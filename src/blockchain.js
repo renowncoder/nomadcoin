@@ -34,8 +34,10 @@ const createHash = (index, previousHash, timestamp, data) =>
   ).toString();
 
 // Get the last block from the blockchain
-
 const getLastBlock = () => blockchain[blockchain.length - 1];
+
+// Get blockchain
+const getBlockchain = () => blockchain;
 
 // Create a new block
 
@@ -113,7 +115,7 @@ const isChainValid = foreignChain => {
 
 // Replace Chain
 const replaceChain = newChain => {
-  if (isChainValid(newChain) && newChain.length > blockchain.length) {
+  if (isChainValid(newChain) && newChain.length > getBlockchain().length) {
     blockchain = newChain;
     return true;
   }
@@ -128,4 +130,9 @@ const addBlockToChain = newBlock => {
   } else {
     return false;
   }
+};
+
+module.exports = {
+  getBlockchain,
+  createNewBlock
 };
