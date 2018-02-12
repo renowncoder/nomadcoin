@@ -3,11 +3,11 @@ const CryptoJS = require("crypto-js");
 // Block Structure
 
 class Block {
-  constructor(index, hash, previousHash, timeStamp, data) {
+  constructor(index, hash, previousHash, timestamp, data) {
     this.index = index;
     this.hash = hash;
     this.previousHash = previousHash;
-    this.timeStamp = timeStamp;
+    this.timestamp = timestamp;
     this.data = data;
   }
 }
@@ -28,9 +28,9 @@ let blockchain = [genesisBlock];
 
 // Create the hash of the block
 
-const createHash = (index, previousHash, timeStamp, data) =>
+const createHash = (index, previousHash, timestamp, data) =>
   CryptoJS.SHA256(
-    index + previousHash + timeStamp + JSON.stringify(data)
+    index + previousHash + timestamp + JSON.stringify(data)
   ).toString();
 
 // Get the last block from the blockchain
@@ -42,19 +42,46 @@ const getLastBlock = () => blockchain[blockchain.length - 1];
 const createNewBlock = data => {
   const previousBlock = getLastBlock();
   const newBlockIndex = previousBlock.index + 1;
-  const newTimeStamp = new Date().getTime() / 1000;
+  const newtimestamp = new Date().getTime() / 1000;
   const newHash = createHash(
     newBlockIndex,
     previousBlock.hash,
-    newTimeStamp,
+    newtimestamp,
     data
   );
   const newBlock = new Block(
     newBlockIndex,
     newHash,
     previousBlock.hash,
-    newTimeStamp,
+    newtimestamp,
     data
   );
   return newBlock;
+};
+
+const getBlockHash = block =>
+  createHash(block.index, block.previousHash, block.timestamp, block.data);
+
+const isNewBlockValid = (newBlock, oldBlock) => {
+  // Check if the index of the new block is greater than the old block's index
+  if (oldBlock.index + 1 !== newBlock.index) {
+    return false;
+    // Check if the new block's previous hash is the same as the old block's hash
+  } else if (oldBlock.hash !== newBlock.previousHash) {
+    return false;
+    // Check if the new block's hash is the same as the hash taht we calculate
+  } else if (getBlockHash(newBlock) !== newBlock.hash) {
+    return false;
+  }
+  return true;
+};
+
+const isNewStructureValid = block => {
+  return (
+    typeof block.index === "number" &&
+    typeof block.hash === "string" &&
+    typeof block.previousHash === "string" &&
+    typeof block.timestamp === "number" &&
+    typeof block.data === "string"
+  );
 };
