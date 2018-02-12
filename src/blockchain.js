@@ -74,6 +74,7 @@ const isNewStructureValid = block => {
   );
 };
 
+// Valiate new blocks
 const isNewBlockValid = (newBlock, oldBlock) => {
   // Check if the structure of the new block is correct
   if (!isNewStructureValid(newBlock)) {
@@ -92,6 +93,7 @@ const isNewBlockValid = (newBlock, oldBlock) => {
   return true;
 };
 
+// Check if the chain is valid
 const isChainValid = foreignChain => {
   const isGenesisValid = block => {
     return JSON.stringify(block) === JSON.stringify(genesisBlock);
@@ -107,4 +109,23 @@ const isChainValid = foreignChain => {
     }
   }
   return true;
+};
+
+// Replace Chain
+const replaceChain = newChain => {
+  if (isChainValid(newChain) && newChain.length > blockchain.length) {
+    blockchain = newChain;
+    return true;
+  }
+  return false;
+};
+
+// Add block to chain
+const addBlockToChain = newBlock => {
+  if (isNewBlockValid(newBlock, getLastBlock())) {
+    blockchain.push(newBlock);
+    return true;
+  } else {
+    return false;
+  }
 };
