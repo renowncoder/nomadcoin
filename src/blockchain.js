@@ -59,10 +59,26 @@ const createNewBlock = data => {
   return newBlock;
 };
 
+// Get any block's hash
 const getBlockHash = block =>
   createHash(block.index, block.previousHash, block.timestamp, block.data);
 
+// Check if the structure of the Block and it's types are what they should be
+const isNewStructureValid = block => {
+  return (
+    typeof block.index === "number" &&
+    typeof block.hash === "string" &&
+    typeof block.previousHash === "string" &&
+    typeof block.timestamp === "number" &&
+    typeof block.data === "string"
+  );
+};
+
 const isNewBlockValid = (newBlock, oldBlock) => {
+  // Check if the structure of the new block is correct
+  if (!isNewStructureValid(newBlock)) {
+    return false;
+  }
   // Check if the index of the new block is greater than the old block's index
   if (oldBlock.index + 1 !== newBlock.index) {
     return false;
@@ -76,12 +92,19 @@ const isNewBlockValid = (newBlock, oldBlock) => {
   return true;
 };
 
-const isNewStructureValid = block => {
-  return (
-    typeof block.index === "number" &&
-    typeof block.hash === "string" &&
-    typeof block.previousHash === "string" &&
-    typeof block.timestamp === "number" &&
-    typeof block.data === "string"
-  );
+const isChainValid = foreignChain => {
+  const isGenesisValid = block => {
+    return JSON.stringify(block) === JSON.stringify(genesisBlock);
+  };
+  // Check if the genesis block is the same in our chain and theirs
+  if (!isGenesisValid(foreignChain[0])) {
+    return false;
+  }
+  // Validate each block from the other blockchain
+  for (let i = 1; i < foreignChain.length; i++) {
+    if (!isNewBlockValid(foreignChain[i], foreignChain[i - 1])) {
+      return false;
+    }
+  }
+  return true;
 };
