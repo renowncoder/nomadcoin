@@ -1,11 +1,14 @@
 const express = require("express"),
   bodyParser = require("body-parser"),
   morgan = require("morgan"),
-  Blockchain = require("./blockchain");
+  Blockchain = require("./blockchain"),
+  ws = require("./ws");
 
 const getBlockchain = Blockchain.getBlockchain;
 const createNewBlock = Blockchain.createNewBlock;
-const PORT = 3000;
+
+const HTTP_PORT = process.env.HTTP_PORT || 3000;
+const P2P_PORT = process.env.P2P_PORT || 4000;
 
 const app = express();
 
@@ -22,6 +25,9 @@ app.post("/mineBlock", (req, res) => {
   res.send(newBlock);
 });
 
-app.listen(3000, () => {
-  console.log(`Nomad Coin Node Running on port ${PORT} ✅`);
+// export HTTP_PORT=
+app.listen(HTTP_PORT, () => {
+  console.log(`Nomad Coin Node Running on port ${HTTP_PORT} ✅`);
 });
+
+ws.startP2PServer(P2P_PORT);
