@@ -58,6 +58,7 @@ const createNewBlock = data => {
     newtimestamp,
     data
   );
+  addBlockToChain(newBlock);
   return newBlock;
 };
 
