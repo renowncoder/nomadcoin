@@ -1,4 +1,4 @@
-# Nomad Coin
+# Nomadcoin
 
 ###### (This is fucking huge)
 

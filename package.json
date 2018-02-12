@@ -6,11 +6,11 @@
     "morgan": "^1.9.0",
     "ws": "^4.0.0"
   },
-  "name": "nomad-coin",
+  "name": "nomadcoin",
   "version": "1.0.0",
   "description": "Cryptocurrency built using JavaScript.",
   "main": "src/server.js",
-  "repository": "https://github.com/serranoarevalo/nomad-coin",
+  "repository": "https://github.com/serranoarevalo/nomadcoin",
   "author": "Nicolás Serrano Arévalo <itnico.las.me@gmail.com>",
   "license": "MIT",
   "private": false,

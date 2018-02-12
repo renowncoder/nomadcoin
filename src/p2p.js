@@ -14,12 +14,6 @@ const getSockets = () => sockets;
 
 const initConnection = socket => {
   sockets.push(socket);
-  socket.on("message", () => {
-    console.log("welcome!");
-  });
-  setTimeout(() => {
-    socket.send("welcome");
-  }, 1000);
 };
 
 const connectToPeers = newPeer => {
