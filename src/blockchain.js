@@ -67,7 +67,7 @@ const getBlockHash = block =>
   createHash(block.index, block.previousHash, block.timestamp, block.data);
 
 // Check if the structure of the Block and it's types are what they should be
-const isNewStructureValid = block => {
+const isBlockStructureValid = block => {
   return (
     typeof block.index === "number" &&
     typeof block.hash === "string" &&
@@ -78,9 +78,9 @@ const isNewStructureValid = block => {
 };
 
 // Valiate new blocks
-const isNewBlockValid = (newBlock, oldBlock) => {
+const isBlockValid = (newBlock, oldBlock) => {
   // Check if the structure of the new block is correct
-  if (!isNewStructureValid(newBlock)) {
+  if (!isBlockStructureValid(newBlock)) {
     return false;
   }
   // Check if the index of the new block is greater than the old block's index
@@ -107,7 +107,7 @@ const isChainValid = foreignChain => {
   }
   // Validate each block from the other blockchain
   for (let i = 1; i < foreignChain.length; i++) {
-    if (!isNewBlockValid(foreignChain[i], foreignChain[i - 1])) {
+    if (!isBlockValid(foreignChain[i], foreignChain[i - 1])) {
       return false;
     }
   }
@@ -125,7 +125,7 @@ const replaceChain = newChain => {
 
 // Add block to chain
 const addBlockToChain = newBlock => {
-  if (isNewBlockValid(newBlock, getNewestBlock())) {
+  if (isBlockValid(newBlock, getNewestBlock())) {
     blockchain.push(newBlock);
     return true;
   } else {
@@ -136,5 +136,8 @@ const addBlockToChain = newBlock => {
 module.exports = {
   getBlockchain,
   createNewBlock,
-  getNewestBlock
+  getNewestBlock,
+  isBlockStructureValid,
+  addBlockToChain,
+  replaceChain
 };

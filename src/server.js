@@ -4,9 +4,8 @@ const express = require("express"),
   Blockchain = require("./blockchain"),
   P2P = require("./p2p");
 
-const getBlockchain = Blockchain.getBlockchain;
-const createNewBlock = Blockchain.createNewBlock;
-const connectToPeers = P2P.connectToPeers;
+const { getBlockchain, createNewBlock } = Blockchain;
+const { connectToPeers, startP2PServer } = P2P;
 
 const HTTP_PORT = process.env.HTTP_PORT || 3000;
 const P2P_PORT = process.env.P2P_PORT || 4000;
@@ -36,4 +35,4 @@ app.listen(HTTP_PORT, () => {
   console.log(`Nomad Coin Node Running on port ${HTTP_PORT} ✅`);
 });
 
-P2P.startP2PServer(P2P_PORT);
+startP2PServer(P2P_PORT);
