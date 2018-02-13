@@ -1,5 +1,5 @@
-const Blockchain = require("./blockchain");
-const WebSocket = require("ws");
+const WebSocket = require("ws"),
+    Blockchain = require("./blockchain");
 
 const {
     getNewestBlock,
@@ -48,7 +48,7 @@ const startP2PServer = port => {
         initConnection(ws);
     });
     // eslint-disable-next-line
-    console.log(`Nomad Coin P2P Server Running on port ${port} ✅`);
+  console.log(`Nomad Coin P2P Server Running on port ${port} ✅`);
 };
 
 // Getting the sockets
@@ -95,8 +95,7 @@ const socketMessageHandler = ws => {
             sendMessage(ws, returnAll());
             break;
         case BLOCKCHAIN_RESPONSE:
-            
-            // If the blockchain answers with no blocks break
+        // If the blockchain answers with no blocks break
             if (receivedBlocks === null) {
                 break;
             }
@@ -112,6 +111,8 @@ const sendMessageToAll = message =>
     sockets.forEach(socket => sendMessage(socket, message));
 
 const returnLatest = () => blockchainResponse([getNewestBlock()]);
+
+const broadcastNewBlock = () => sendMessageToAll(returnLatest());
 
 const returnAll = () => blockchainResponse(getBlockchain());
 
@@ -131,6 +132,7 @@ const handleBlockchainResponse = receivedBlocks => {
     Check if the index of the block we received is greater than the newest block in our blockchain
     This means that our blockchain is behind
    */
+
     if (latestBlockReceived.index > newestBlock.index) {
     /* 
       Check if the received block has the hash of hour newest block in his 'previousHash'.
@@ -145,9 +147,9 @@ const handleBlockchainResponse = receivedBlocks => {
             sendMessageToAll(getAll());
         } else {
             /* 
-        If we get more than one block and our blockchain is behind,
-        we will just replace our blockchain with the longer one that we just received
-      */
+              If we get more than one block and our blockchain is behind,
+              we will just replace our blockchain with the longer one that we just received
+            */
             replaceChain(receivedBlocks);
         }
     } else {
@@ -159,5 +161,6 @@ const handleBlockchainResponse = receivedBlocks => {
 module.exports = {
     startP2PServer,
     connectToPeers,
-    getSockets
+    getSockets,
+    broadcastNewBlock
 };

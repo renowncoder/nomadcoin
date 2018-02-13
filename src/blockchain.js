@@ -1,5 +1,4 @@
 const CryptoJS = require("crypto-js");
-
 // Block Structure
 
 class Block {
@@ -18,7 +17,7 @@ const genesisBlock = new Block(
     0,
     "3DF6EF422472827B1E77AD3E7A194108BBB4D8B925176AFCABE7BEDA9E561071",
     null,
-    new Date().getTime() / 1000,
+    1518512316,
     "Genesis block MF"
 );
 
@@ -58,6 +57,7 @@ const createNewBlock = data => {
         newtimestamp,
         data
     );
+    require("./p2p").broadcastNewBlock();
     addBlockToChain(newBlock);
     return newBlock;
 };
