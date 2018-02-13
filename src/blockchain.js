@@ -58,6 +58,7 @@ const createNewBlock = data => {
         data
     );
     addBlockToChain(newBlock);
+    // We do this to avoid circular requirements
     require("./p2p").broadcastNewBlock();
     return newBlock;
 };
