@@ -44,7 +44,6 @@ const findBlock = (index, previousHash, timestamp, data, difficulty) => {
       difficulty,
       nonce
     );
-    console.log("Trying hash: ", hexToBinary(hash), " with: ", "0 ", nonce);
     // If the hash binary has the desired zeros then we will create the block
     if (hashMatchesDifficulty(hash, difficulty)) {
       return new Block(
@@ -76,9 +75,9 @@ const hashMatchesDifficulty = (hash, difficulty) => {
 
 // Create the hash of the block
 
-const createHash = (index, previousHash, timestamp, data) =>
+const createHash = (index, previousHash, timestamp, data, difficulty, nonce) =>
   CryptoJS.SHA256(
-    index + previousHash + timestamp + JSON.stringify(data)
+    index + previousHash + timestamp + JSON.stringify(data) + difficulty + nonce
   ).toString();
 
 // Get the last block from the blockchain
@@ -158,7 +157,14 @@ const createNewBlock = data => {
 
 // Get any block's hash
 const getBlockHash = block =>
-  createHash(block.index, block.previousHash, block.timestamp, block.data);
+  createHash(
+    block.index,
+    block.previousHash,
+    block.timestamp,
+    block.data,
+    block.difficulty,
+    block.nonce
+  );
 
 // Check if the structure of the Block and it's types are what they should be
 const isBlockStructureValid = block => {
