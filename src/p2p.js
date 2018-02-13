@@ -87,6 +87,7 @@ const socketMessageHandler = ws => {
             return;
         }
         const receivedBlocks = message.data;
+        console.log("got a message", message.data);
         switch (message.type) {
         case GET_LATEST:
             sendMessage(ws, returnLatest());
@@ -140,7 +141,9 @@ const handleBlockchainResponse = receivedBlocks => {
     */
         if (newestBlock.hash === latestBlockReceived.previousHash) {
             // If we are only one block behind all we have to do is add it to our chain
-            addBlockToChain(latestBlockReceived);
+            if (addBlockToChain(latestBlockReceived)) {
+                sendMessageToAll(returnLatest());
+            }
             // If we only got one block that is not only one block behind we have to get the whole blockchain
         } else if (receivedBlocks.length === 1) {
             // Send message to all sockets to get our blockchain
