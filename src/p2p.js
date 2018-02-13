@@ -5,7 +5,8 @@ const {
   getNewestBlock,
   isBlockStructureValid,
   addBlockToChain,
-  replaceChain
+  replaceChain,
+  getBlockchain
 } = Blockchain;
 
 // We need to save the sockets somewhere
@@ -89,12 +90,16 @@ const socketMessageHandler = ws => {
       case GET_LATEST:
         sendMessage(ws, returnLatest());
         break;
+      case GET_ALL:
+        sendMessage(ws, returnAll());
+        break;
       case BLOCKCHAIN_RESPONSE:
         const receivedBlocks = message.data;
         // If the blockchain answers with no blocks break
         if (receivedBlocks === null) {
           break;
         }
+
         handleBlockchainResponse(receivedBlocks);
         break;
     }
@@ -103,7 +108,12 @@ const socketMessageHandler = ws => {
 
 const sendMessage = (ws, message) => ws.send(JSON.stringify(message));
 
+const sendMessageToAll = message =>
+  sockets.forEach(socket => sendMessage(socket, message));
+
 const returnLatest = () => blockchainResponse([getNewestBlock()]);
+
+const returnAll = () => blockchainResponse(getBlockchain());
 
 const handleBlockchainResponse = receivedBlocks => {
   // Check if the blockchain size is bigger than zero
@@ -131,7 +141,8 @@ const handleBlockchainResponse = receivedBlocks => {
       addBlockToChain(latestBlockReceived);
       // If we only got one block that is not only one block behind we have to get the whole blockchain
     } else if (receivedBlocks.length === 1) {
-      // TODO: Get all blocks
+      // Send message to all sockets to get our blockchain
+      sendMessageToAll(getAll());
     } else {
       /* 
         If we get more than one block and our blockchain is behind,
@@ -139,6 +150,9 @@ const handleBlockchainResponse = receivedBlocks => {
       */
       replaceChain(receivedBlocks);
     }
+  } else {
+    // If we receive a blockchain but we are not behind it, we do nothing.
+    return;
   }
 };
 
