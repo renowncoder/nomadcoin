@@ -57,8 +57,8 @@ const createNewBlock = data => {
         newtimestamp,
         data
     );
-    require("./p2p").broadcastNewBlock();
     addBlockToChain(newBlock);
+    require("./p2p").broadcastNewBlock();
     return newBlock;
 };
 
