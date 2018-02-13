@@ -5,7 +5,7 @@ const express = require("express"),
     P2P = require("./p2p");
 
 const { getBlockchain, createNewBlock } = Blockchain;
-const { connectToPeers, startP2PServer, broadcastNewBlock } = P2P;
+const { connectToPeers, startP2PServer } = P2P;
 
 const HTTP_PORT = process.env.HTTP_PORT || 3000;
 const P2P_PORT = process.env.P2P_PORT || 4000;

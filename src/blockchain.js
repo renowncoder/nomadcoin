@@ -1,13 +1,16 @@
 const CryptoJS = require("crypto-js");
+const hexToBinary = require("hex-to-binary");
 // Block Structure
 
 class Block {
-    constructor(index, hash, previousHash, timestamp, data) {
+    constructor(index, hash, previousHash, timestamp, data, difficulty, nonce) {
         this.index = index;
         this.hash = hash;
         this.previousHash = previousHash;
         this.timestamp = timestamp;
         this.data = data;
+        this.difficulty = difficulty;
+        this.nonce = nonce;
     }
 }
 
@@ -18,12 +21,58 @@ const genesisBlock = new Block(
     "3DF6EF422472827B1E77AD3E7A194108BBB4D8B925176AFCABE7BEDA9E561071",
     null,
     1518512316,
-    "Genesis block MF"
+    "Genesis block MF",
+    0,
+    0
 );
 
 // Create the blockchain with the Genesis Block hardcoded into it.
 
 let blockchain = [genesisBlock];
+
+// Find a block
+const findBlock = (index, previousHash, timestamp, data, difficulty) => {
+    let nonce = 0;
+    // eslint-disable-next-line
+  console.log("difficulty is ", difficulty);
+    while (true) {
+    // We create a hash with the contents of our candidate block
+        const hash = createHash(
+            index,
+            previousHash,
+            timestamp,
+            data,
+            difficulty,
+            nonce
+        );
+        // If the hash binary has the desired zeros then we will create the block
+        if (hashMatchesDifficulty(hash, difficulty)) {
+            return new Block(
+                index,
+                hash,
+                previousHash,
+                timestamp,
+                data,
+                difficulty,
+                nonce
+            );
+        }
+        // If it doesn't we will just increase the nonce
+        nonce++;
+    }
+};
+
+// Check if the hash matches the dificulty
+
+const hashMatchesDifficulty = (hash, difficulty) => {
+    // First we need to convert the hex hash into binary
+    const hashInBinary = hexToBinary(hash);
+    // Second we will get the difficulty of the block in zeros
+    const requiredZeros = "0".repeat(difficulty);
+    // Check if the hash in binary starts with that amount of zeros
+    console.log("Trying hash: ", hashInBinary, " with: ", requiredZeros);
+    return hashInBinary.startsWith(requiredZeros);
+};
 
 // Create the hash of the block
 
@@ -50,12 +99,12 @@ const createNewBlock = data => {
         newtimestamp,
         data
     );
-    const newBlock = new Block(
+    const newBlock = findBlock(
         newBlockIndex,
-        newHash,
         previousBlock.hash,
         newtimestamp,
-        data
+        data,
+        5
     );
     addBlockToChain(newBlock);
     // We do this to avoid circular requirements
