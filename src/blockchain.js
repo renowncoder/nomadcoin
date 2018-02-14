@@ -70,6 +70,7 @@ const hashMatchesDifficulty = (hash, difficulty) => {
   const requiredZeros = "0".repeat(difficulty);
   // Check if the hash in binary starts with that amount of zeros
   // eslint-disable-next-line
+  console.log("Finding ", requiredZeros, " at the begining of: ", hashInBinary);
   return hashInBinary.startsWith(requiredZeros);
 };
 
@@ -177,6 +178,13 @@ const isBlockStructureValid = block => {
   );
 };
 
+const isTimestampValid = (newBlock, oldBlock) => {
+  return (
+    oldBlock.timestamp - 60 < newBlock.timestamp &&
+    newBlock.timestamp - 60 < getTimeStamp()
+  );
+};
+
 // Valiate new blocks
 const isBlockValid = (newBlock, oldBlock) => {
   // Check if the structure of the new block is correct
@@ -191,6 +199,9 @@ const isBlockValid = (newBlock, oldBlock) => {
     return false;
     // Check if the new block's hash is the same as the hash taht we calculate
   } else if (getBlockHash(newBlock) !== newBlock.hash) {
+    return false;
+    // Check if the timestamp is valid
+  } else if (!isTimestampValid(newBlock, oldBlock)) {
     return false;
   }
   return true;
