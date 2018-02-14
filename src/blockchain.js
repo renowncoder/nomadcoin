@@ -225,10 +225,26 @@ const isChainValid = foreignChain => {
   return true;
 };
 
+// Calculate the difficulty of the chain by summing all the difficulties
+
+const sumDifficulty = someBlockchain => {
+  return someBlockchain.map(block => block.difficulty).reduce((a, b) => a + b);
+};
+
 // Replace Chain
 const replaceChain = newChain => {
-  if (isChainValid(newChain) && newChain.length > getBlockchain().length) {
+  /*
+    To replace a chain, the new chain must be:
+      1) Valid and,
+      2) Be more 'difficult' than our current blockchain
+
+  */
+  if (
+    isChainValid(newChain) &&
+    sumDifficulty(newChain) > sumDifficulty(getBlockchain())
+  ) {
     blockchain = newChain;
+    require("./p2p").broadcastNewBlock();
     return true;
   }
   return false;
