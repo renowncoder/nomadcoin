@@ -176,7 +176,7 @@ const createNewBlockWithTx = (receiverAddress, amount) => {
   return createNewRawBlock(blockData);
 };
 
-// Create a new raw block
+// Create a new raw block.
 
 const createNewRawBlock = data => {
   const previousBlock = getNewestBlock();
@@ -203,10 +203,12 @@ const createNewRawBlock = data => {
   Create a new block, which means, reward the miner
 */
 const createNewBlock = () => {
+  // We create the coinbase transaction
   const coinbaseTx = createCoinbaseTransaction(
     getPublicFromWallet(),
     getNewestBlock().index + 1
   );
+  // Include it on the block data
   const blockData = [coinbaseTx];
   return createNewRawBlock(blockData);
 };

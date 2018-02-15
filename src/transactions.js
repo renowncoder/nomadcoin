@@ -1,5 +1,6 @@
 const CryptoJS = require("crypto-js"),
   EC = require("elliptic").ec,
+  _ = require("lodash"),
   utils = require("./utils");
 
 // Initialize ECDSA context
@@ -324,6 +325,70 @@ const getPublicKey = privateKey => {
     .encode("hex");
 };
 
+// Checkin if there are any duplicated
+const hasDuplicates = txIns => {
+  /*
+    Here we intend to make groups of txIn.txOutId + txIn.txOutIndex
+    (we should one find one of this)
+  */
+  const groups = _.countBy(txIns, txIn => txIn.txOutId + txIn.txOutIndex);
+  //eslint-disable-next-line
+  console.log(groups);
+  // Then we map all the groups and we check if they have more than one
+  return _(groups)
+    .map(value => {
+      if (value > 1) {
+        // Found a duplicate
+        return true;
+      } else {
+        return false;
+      }
+    })
+    .includes(true);
+};
+
+/*
+  Validating the Block transactions is different,
+  in this case we validate the coinbase transaction separately
+*/
+const validateBlockTransactions = (tx, uTxOuts, blockIndex) => {
+  // The first is the coinbase tx
+  const coinbaseTx = tx[0];
+  if (!validateCoinBaseTx(coinbaseTx, blockIndex)) {
+    // Couldn't validate the coinabase tx
+    return false;
+  }
+
+  // Getting all the txIns
+  const txIns = _(tx)
+    .map(tx => tx.txIns)
+    .flatten()
+    .value();
+
+  // We need to check for duplicates of txIns since they should only be there once
+  if (hasDuplicates(txIns)) {
+    return false;
+  }
+
+  // We split the Transactions in two so we don't include the coinbase tx
+  const nonCoinbaseTx = tx.slice(1);
+  return nonCoinbaseTx
+    .map(tx => validateTx(tx, uTxOuts))
+    .reduce((a, b) => a && b, true);
+};
+
+// Process the transactions, this means validate them and then return the updated uTxOuts
+const processTransaction = (tx, uTxOuts, blockIndex) => {
+  // First we validate the structure of the Tx
+  if (!isTxStructureValid(tx)) {
+    return null;
+  } else if (!validateBlockTransactions(tx, uTxOuts, blockIndex)) {
+    // We also validate the block transactions
+    return null;
+  }
+  return updateUnspentTxOuts(tx, uTxOuts);
+};
+
 module.exports = {
   TxOut,
   TxIn,
@@ -332,5 +397,6 @@ module.exports = {
   getTxId,
   signTxIn,
   isAddressValid,
-  createCoinbaseTransaction
+  createCoinbaseTransaction,
+  processTransaction
 };
