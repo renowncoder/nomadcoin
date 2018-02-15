@@ -3,7 +3,11 @@ const CryptoJS = require("crypto-js"),
   Wallet = require("./wallet"),
   hexToBinary = require("hex-to-binary");
 
-const { isAddressValid, createCoinbaseTransaction } = Transactions;
+const {
+  isAddressValid,
+  createCoinbaseTransaction,
+  processTransactions
+} = Transactions;
 const {
   getPublicFromWallet,
   createTransaction,
@@ -144,7 +148,7 @@ const calculateNewDifficulty = (newestBlock, blockchain) => {
 };
 
 // Put the uTxOuts on a list
-const uTxOutsList = [];
+let uTxOutsList = [];
 
 // Timestamp
 
@@ -309,8 +313,21 @@ const replaceChain = newChain => {
 // Add block to chain
 const addBlockToChain = newBlock => {
   if (isBlockValid(newBlock, getNewestBlock())) {
-    blockchain.push(newBlock);
-    return true;
+    // Validate the Txs and update the uTxOutsList
+    const processedTxs = processTransactions(
+      newBlock.data,
+      uTxOutsList,
+      newBlock.index
+    );
+    if (processedTxs === null) {
+      // If the Txs have not been validated
+      return false;
+    } else {
+      // Add the block to the chain and update the uTxOutsList
+      blockchain.push(newBlock);
+      uTxOutsList = processedTxs;
+      return true;
+    }
   } else {
     return false;
   }

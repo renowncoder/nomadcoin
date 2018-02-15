@@ -115,7 +115,7 @@ const updateUnspentTxOuts = (newTxs, uTxOuts) => {
   // We need to get all the new TxOuts from a transaction
   const newUTxOuts = newTxs
     .map(tx => {
-      tx.txOuts.map(
+      return tx.txOuts.map(
         (txOut, index) =>
           new UnspentTxOut(tx.id, index, txOut.address, txOut.amount)
       );
@@ -135,7 +135,7 @@ const updateUnspentTxOuts = (newTxs, uTxOuts) => {
     .filter(
       uTxO => !findUnspentTxOut(uTxO.txOutId, uTxO.txOutIndex, spentTxOuts)
     )
-    .contact(newUTxOuts);
+    .concat(newUTxOuts);
 
   return resultingUTxOuts;
 };
@@ -332,8 +332,6 @@ const hasDuplicates = txIns => {
     (we should one find one of this)
   */
   const groups = _.countBy(txIns, txIn => txIn.txOutId + txIn.txOutIndex);
-  //eslint-disable-next-line
-  console.log(groups);
   // Then we map all the groups and we check if they have more than one
   return _(groups)
     .map(value => {
@@ -377,16 +375,20 @@ const validateBlockTransactions = (tx, uTxOuts, blockIndex) => {
     .reduce((a, b) => a && b, true);
 };
 
+// Check it the structure of the transactions is valid
+const isTxsStructureValid = txs =>
+  txs.map(isTxStructureValid).reduce((a, b) => a && b, true);
+
 // Process the transactions, this means validate them and then return the updated uTxOuts
-const processTransaction = (tx, uTxOuts, blockIndex) => {
+const processTransactions = (txs, uTxOuts, blockIndex) => {
   // First we validate the structure of the Tx
-  if (!isTxStructureValid(tx)) {
+  if (!isTxsStructureValid(txs)) {
     return null;
-  } else if (!validateBlockTransactions(tx, uTxOuts, blockIndex)) {
+  } else if (!validateBlockTransactions(txs, uTxOuts, blockIndex)) {
     // We also validate the block transactions
     return null;
   }
-  return updateUnspentTxOuts(tx, uTxOuts);
+  return updateUnspentTxOuts(txs, uTxOuts);
 };
 
 module.exports = {
@@ -398,5 +400,5 @@ module.exports = {
   signTxIn,
   isAddressValid,
   createCoinbaseTransaction,
-  processTransaction
+  processTransactions
 };
