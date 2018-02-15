@@ -201,3 +201,61 @@ const isTxStructureValid = tx => {
     return true;
   }
 };
+
+// We need to find the txIn and falidate it
+const validateTxIn = (txIn, tx, uTxOuts) => {
+  // So we start by finding a uTxO that is the input of a transaction
+  const wantedTxOut = uTxOuts.find(uTxO => uTxO.txOutId === txIn.txOutId);
+  if (wantedTxOut === null) {
+    return false;
+  } else {
+    // Get the address of the foudn uTxOut
+    const address = wantedTxOut.address;
+    const key = ec.keyFromPublic(address, "hex");
+    // With the address(public key) we can verify the signature of the txIn
+    return key.verify(tx.id, txIn.signature);
+  }
+};
+
+// We will need to be able to get the TxIn Amount
+const getAmountInTxIn = (txIn, uTxOuts) =>
+  findUnspentTxOut(txIn.txOutId, txIn.txOutIndex, uTxOuts).amount;
+
+const validateTx = (tx, uTxOuts) => {
+  if (getTransactionId(tx) !== tx.id) {
+    // We check if the tx has the same id
+    // as the ID that we check by ourselves
+    return false;
+  }
+  // We also check if the TxIns are valid
+  // by appliying the function and then reducing to a true value
+  const hasValidTxIns = tx.txIns
+    .map(txIn => validateTxIn(txIn, tx, uTxOuts))
+    .reduce((a, b) => a && b, true);
+
+  if (!hasValidTxIns) {
+    return false;
+  }
+
+  /*
+     Now we need to check if the amount of coins in the TxIns are the same
+     amount of coins inside of the TxOuts
+    */
+
+  // First we get the amount in the TxIns
+  const amountInTxIns = tx.txIns
+    .map(txIn => getAmountInTxIn(txIn, uTxOuts))
+    .reduce((a, b) => a + b, 0);
+
+  // Then we get the amount in the TxOuts
+  const amountInTxOuts = tx.txOuts
+    .map(txOut => txOut.amount)
+    .reduce((a, b) => a + b, 0);
+
+  // And finally we check if they have the same amount (they should)
+  if (amountInTxIns !== amountInTxOuts) {
+    return false;
+  }
+
+  return true;
+};
