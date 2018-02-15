@@ -190,9 +190,8 @@ const isBlockValid = (newBlock, oldBlock) => {
   // Check if the structure of the new block is correct
   if (!isBlockStructureValid(newBlock)) {
     return false;
-  }
-  // Check if the index of the new block is greater than the old block's index
-  if (oldBlock.index + 1 !== newBlock.index) {
+  } else if (oldBlock.index + 1 !== newBlock.index) {
+    // Check if the index of the new block is greater than the old block's index
     return false;
     // Check if the new block's previous hash is the same as the old block's hash
   } else if (oldBlock.hash !== newBlock.previousHash) {

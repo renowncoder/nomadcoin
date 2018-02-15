@@ -112,3 +112,92 @@ const updateUnspentTxOuts = (newTxs, uTxOuts) => {
 
   return resultingUTxOuts;
 };
+
+// Check for the validity of and address
+
+const isAddressValid = address => {
+  if (address.length !== 300) {
+    // Is not as long as a public key should be
+    return false;
+  } else if (address.match("^[a-fA-F0-9]+$") === null) {
+    // Contains other characters that are not hex
+    return false;
+  } else if (!address.startsWith("04")) {
+    // If the address doesn't start with a 04 it means is not
+    // a public key
+    return false;
+  } else {
+    return true;
+  }
+};
+
+// Validating the TxIn structure
+const isTxInStructureValid = txIn => {
+  if (txIn == null) {
+    // Check if the TxIn is null
+    return false;
+  } else if (typeof txIn.signature !== "string") {
+    // Check if the signature is not a string
+    return false;
+  } else if (typeof txIn.txOutId !== "string") {
+    // Check if the txOutId is not a string
+    return false;
+  } else if (typeof txIn.txOutIndex !== "number") {
+    // Check if the txOutIndex is not a number
+    return false;
+  } else {
+    // If none of the above it means the structure is valid
+    return true;
+  }
+};
+
+const isTxOutStructureValid = txOut => {
+  if (txOut == null) {
+    // Check if the TxOut is null
+    return false;
+  } else if (typeof txOut.address !== "string") {
+    // Check if the address of the txOut is not a string
+    return false;
+  } else if (!isAddressValid(txOut.address)) {
+    // Check if the structure of the address is not valid
+    return false;
+  } else if (typeof txOut.amount !== "number") {
+    // Check if the amount is not a number
+    return false;
+  } else {
+    return true;
+  }
+};
+
+// Just validating the Tx's structure just like we validate blocks
+const isTxStructureValid = tx => {
+  if (typeof tx.id !== "string") {
+    // Check if the ID is not a string
+    return false;
+  } else if (!(tx.txIns instanceof Array)) {
+    // Check if the txIns are not an array
+    return false;
+  } else if (
+    !tx.txIns.map(isTxInStructureValid).reduce((a, b) => a && b, true)
+  ) {
+    /*
+        This one is actually pretty cool.
+        We apply the function isTxInStructureValid to all the TxIns, 
+        what we are gonna get in return is an array with a bunch of trues and falses
+        like [true, true, false, true] and then we reduce this array to one value by
+        comparing a and b for example until we get one value. If we get even one invalid TxIn
+        this will evaluate to false
+      */
+    return false;
+  } else if (!(tx.txOuts instanceof Array)) {
+    //Check if the txOuts are not an array
+    return false;
+  } else if (
+    !tx.txOuts.map(isTxOutStructureValid).reduce((a, b) => a && b, true)
+  ) {
+    // We do the same as before
+    return false;
+  } else {
+    return true;
+  }
+};
