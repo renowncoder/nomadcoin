@@ -2,10 +2,17 @@ const express = require("express"),
   bodyParser = require("body-parser"),
   morgan = require("morgan"),
   Blockchain = require("./blockchain"),
-  P2P = require("./p2p");
+  P2P = require("./p2p"),
+  Wallet = require("./wallet");
 
-const { getBlockchain, createNewBlock } = Blockchain;
+const {
+  getBlockchain,
+  createNewBlock,
+  createNewBlockWithTx,
+  getAccountBalance
+} = Blockchain;
 const { connectToPeers, startP2PServer } = P2P;
+const { initWallet } = Wallet;
 
 const HTTP_PORT = process.env.HTTP_PORT || 3000;
 const P2P_PORT = process.env.P2P_PORT || 4000;
@@ -30,6 +37,22 @@ app.post("/addPeer", (req, res) => {
   res.send();
 });
 
+app.post("/mineTransaction", (req, res) => {
+  const address = req.body.address;
+  const amount = req.body.amount;
+  try {
+    const response = createNewBlockWithTx(address, amount);
+    res.send(response);
+  } catch (e) {
+    res.status(400).send(e.message);
+  }
+});
+
+app.get("/balance", (req, res) => {
+  const balance = getAccountBalance();
+  res.send({ balance: balance });
+});
+
 // export HTTP_PORT=
 app.listen(HTTP_PORT, () => {
   // eslint-disable-next-line
@@ -37,3 +60,4 @@ app.listen(HTTP_PORT, () => {
 });
 
 startP2PServer(P2P_PORT);
+initWallet();

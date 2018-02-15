@@ -1,7 +1,7 @@
 const EC = require("elliptic").ec,
   fs = require("fs"),
   _ = require("lodash"),
-  transactions = require("./transactions");
+  Transactions = require("./transactions");
 
 const ec = new EC("secp256k1");
 const privateKeyLocation = "./privateKey";
@@ -13,7 +13,7 @@ const {
   Transaction,
   getTxId,
   signTxIn
-} = transactions;
+} = Transactions;
 
 // Generate a private key
 const generatePrivateKey = () => {
@@ -24,7 +24,7 @@ const generatePrivateKey = () => {
 
 // Get the private key from the file
 const getPrivateFromWallet = () => {
-  const buffer = fs.readFileSync(privateKeyLocation, "utf-8");
+  const buffer = fs.readFileSync(privateKeyLocation, "utf8");
   return buffer.toString();
 };
 
@@ -77,8 +77,7 @@ const findAmountOnTxOuts = (amountNeeded, myUTxOuts) => {
     }
   }
   //eslint-disable-next-line
-  console.log("Not enough founds");
-  return false;
+  throw Error("Not enough founds");
 };
 
 /*
@@ -138,4 +137,12 @@ const createTransaction = (receiverAddress, amount, privateKey, uTxOuts) => {
     return txIn;
   });
   return tx;
+};
+
+module.exports = {
+  getPublicFromWallet,
+  createTransaction,
+  getPrivateFromWallet,
+  initWallet,
+  getBalance
 };

@@ -1,5 +1,16 @@
 const CryptoJS = require("crypto-js"),
+  Transactions = require("./transactions"),
+  Wallet = require("./wallet"),
   hexToBinary = require("hex-to-binary");
+
+const { isAddressValid, createCoinbaseTransaction } = Transactions;
+const {
+  getPublicFromWallet,
+  createTransaction,
+  getPrivateFromWallet,
+  getBalance
+} = Wallet;
+
 // Block Structure
 
 class Block {
@@ -132,13 +143,42 @@ const calculateNewDifficulty = (newestBlock, blockchain) => {
   }
 };
 
+// Put the uTxOuts on a list
+const uTxOutsList = [];
+
 // Timestamp
 
 const getTimeStamp = () => Math.round(new Date().getTime() / 1000);
 
-// Create a new block
+// Create a new block with a transaction on it
+const createNewBlockWithTx = (receiverAddress, amount) => {
+  if (!isAddressValid(receiverAddress)) {
+    // Checking if the intended address is invalid and we throw an error
+    // so we can catch it on the server
+    throw Error("Address is invalid");
+  } else if (typeof amount !== "number") {
+    // Checking if the amount is not a number and here we also throw an error
+    throw Error("Amount is invalid");
+  }
+  // We need to create a new coinbase transaction for the miner (right now it's also the sender)
+  const coinbaseTx = createCoinbaseTransaction(
+    getPublicFromWallet(),
+    getNewestBlock().index + 1
+  );
+  // Now we actually create the transaction to the sender
+  const tx = createTransaction(
+    receiverAddress,
+    amount,
+    getPrivateFromWallet(),
+    uTxOutsList
+  );
+  const blockData = [coinbaseTx, tx];
+  return createNewRawBlock(blockData);
+};
 
-const createNewBlock = data => {
+// Create a new raw block
+
+const createNewRawBlock = data => {
   const previousBlock = getNewestBlock();
   const newBlockIndex = previousBlock.index + 1;
   const newtimestamp = getTimeStamp();
@@ -150,10 +190,25 @@ const createNewBlock = data => {
     data,
     difficulty
   );
-  addBlockToChain(newBlock);
-  // We do this to avoid circular requirements
-  require("./p2p").broadcastNewBlock();
-  return newBlock;
+  if (addBlockToChain(newBlock)) {
+    // We do this to avoid circular requirements
+    require("./p2p").broadcastNewBlock();
+    return newBlock;
+  } else {
+    return null;
+  }
+};
+
+/*
+  Create a new block, which means, reward the miner
+*/
+const createNewBlock = () => {
+  const coinbaseTx = createCoinbaseTransaction(
+    getPublicFromWallet(),
+    getNewestBlock().index + 1
+  );
+  const blockData = [coinbaseTx];
+  return createNewRawBlock(blockData);
 };
 
 // Get any block's hash
@@ -174,7 +229,7 @@ const isBlockStructureValid = block => {
     typeof block.hash === "string" &&
     typeof block.previousHash === "string" &&
     typeof block.timestamp === "number" &&
-    typeof block.data === "string"
+    typeof block.data === "object"
   );
 };
 
@@ -259,11 +314,18 @@ const addBlockToChain = newBlock => {
   }
 };
 
+// Get the account balance
+const getAccountBalance = () => {
+  return getBalance(getPublicFromWallet(), uTxOutsList);
+};
+
 module.exports = {
   getBlockchain,
   createNewBlock,
   getNewestBlock,
   isBlockStructureValid,
   addBlockToChain,
-  replaceChain
+  replaceChain,
+  createNewBlockWithTx,
+  getAccountBalance
 };

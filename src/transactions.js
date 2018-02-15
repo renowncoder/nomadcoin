@@ -42,9 +42,6 @@ class UnspentTxOut {
   }
 }
 
-// Put UTxOuts on a list
-const UTxOutsList = [];
-
 // Create the Transaction ID
 const getTxId = transaction => {
   // Add up all the content of the transactions Ins
@@ -96,6 +93,22 @@ const findUnspentTxOut = (txId, txIndex, unspentTxOuts) => {
   );
 };
 
+// Create a Coinbase transaction to reward the miner
+const createCoinbaseTransaction = (address, blockIndex) => {
+  const tx = new Transaction();
+  // Empty txIn because is coins out of nowhere
+  const txIn = new TxIn();
+  txIn.signature = "";
+  txIn.txOutId = "";
+  // We give the index of the block as the txOutIndex
+  txIn.txOutIndex = blockIndex;
+  // Only one txIn
+  tx.txIns = [txIn];
+  tx.txOuts = [new TxOut(address, COINBASE_AMOUNT)];
+  tx.id = getTxId(tx);
+  return tx;
+};
+
 // Update the transaction outputs
 const updateUnspentTxOuts = (newTxs, uTxOuts) => {
   // We need to get all the new TxOuts from a transaction
@@ -129,7 +142,7 @@ const updateUnspentTxOuts = (newTxs, uTxOuts) => {
 // Check for the validity of and address
 
 const isAddressValid = address => {
-  if (address.length !== 300) {
+  if (address.length !== 130) {
     // Is not as long as a public key should be
     return false;
   } else if (address.match("^[a-fA-F0-9]+$") === null) {
@@ -317,5 +330,7 @@ module.exports = {
   Transaction,
   getPublicKey,
   getTxId,
-  signTxIn
+  signTxIn,
+  isAddressValid,
+  createCoinbaseTransaction
 };
