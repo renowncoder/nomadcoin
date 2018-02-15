@@ -1,5 +1,5 @@
-const CryptoJS = require("crypto-js");
-const hexToBinary = require("hex-to-binary");
+const CryptoJS = require("crypto-js"),
+  hexToBinary = require("hex-to-binary");
 // Block Structure
 
 class Block {
