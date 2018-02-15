@@ -82,3 +82,33 @@ const findUnspentTxOut = (txId, txIndex, unspentTxOuts) => {
     uTxO => uTxO.txOutId === txId && uTxO.txOutIndex === txIndex
   );
 };
+
+// Update the transaction outputs
+const updateUnspentTxOuts = (newTxs, uTxOuts) => {
+  // We need to get all the new TxOuts from a transaction
+  const newUTxOuts = newTxs
+    .map(tx => {
+      tx.txOuts.map(
+        (txOut, index) =>
+          new UnspentTxOut(tx.id, index, txOut.address, txOut.amount)
+      );
+    })
+    .reduce((a, b) => a.concat(b), []);
+  // We also need to find all the TxOuts that were used as TxIns and Empty them
+  const spentTxOuts = newTxs
+    .map(tx => tx.txIns)
+    .reduce((a, b) => a.concat(b), [])
+    .map(txIn => new UnspentTxOut(txIn.txOutId, txIn.txOutIndex, "", 0));
+
+  /* 
+        We need to remove all the UTxO that have been spent from our 
+        UTxOuts [] and we need to add the newUTxOuts
+    */
+  const resultingUTxOuts = uTxOuts
+    .filter(
+      uTxO => !findUnspentTxOut(uTxO.txOutId, uTxO.txOutIndex, spentTxOuts)
+    )
+    .contact(newUTxOuts);
+
+  return resultingUTxOuts;
+};
