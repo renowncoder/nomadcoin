@@ -70,7 +70,16 @@ const signTxIn = (tx, txInIndex, privateKey, unspentTxOuts) => {
     unspentTxOuts
   );
   if (referencedUnspentTxOut === null) {
+    // Before we sign anything it's cool to check if this txIn comes from an uTxOut
     return;
+  }
+  const referencedAddress = referencedUnspentTxOut.address;
+  if (getPublicKey(privateKey) !== referencedAddress) {
+    /*
+        Here we are checking if somebody is trying to send coins from an address
+        that does not exist.
+    */
+    return false;
   }
   // Sign the ID with our private key
   const key = ec.keyFromPrivate(privateKey, "hex");
@@ -292,4 +301,21 @@ const validateCoinBaseTx = (tx, blockIndex) => {
   } else {
     return true;
   }
+};
+
+// Getting the public key from private
+const getPublicKey = privateKey => {
+  return ec
+    .keyFromPrivate(privateKey, "hex")
+    .getPublic()
+    .encode("hex");
+};
+
+module.exports = {
+  TxOut,
+  TxIn,
+  Transaction,
+  getPublicKey,
+  getTxId,
+  signTxIn
 };
