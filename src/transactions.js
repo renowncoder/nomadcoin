@@ -5,6 +5,10 @@ const CryptoJS = require("crypto-js"),
 // Initialize ECDSA context
 const ec = new EC("secp256k1");
 
+// COINBASE constant (the reward)
+
+const COINBASE_AMOUNT = 50;
+
 // Where are the coins going?
 class TxOut {
   // How many coins and to where
@@ -39,10 +43,10 @@ class UnspentTxOut {
 }
 
 // Put UTxOuts on a list
-const UTxOuts = [];
+const UTxOutsList = [];
 
 // Create the Transaction ID
-const getTransactionId = transaction => {
+const getTxId = transaction => {
   // Add up all the content of the transactions Ins
   const txInContent = transaction.txIns
     .map(txIn => txIn.txOutId + txIn.txOutIndex)
@@ -222,7 +226,7 @@ const getAmountInTxIn = (txIn, uTxOuts) =>
   findUnspentTxOut(txIn.txOutId, txIn.txOutIndex, uTxOuts).amount;
 
 const validateTx = (tx, uTxOuts) => {
-  if (getTransactionId(tx) !== tx.id) {
+  if (getTxId(tx) !== tx.id) {
     // We check if the tx has the same id
     // as the ID that we check by ourselves
     return false;
@@ -258,4 +262,34 @@ const validateTx = (tx, uTxOuts) => {
   }
 
   return true;
+};
+
+/*
+Validate the coinbase transaction.
+This basically means validating that the transaction only has
+50 coins, no TxIns.
+This is where we reward miners for their hard work
+
+*/
+
+const validateCoinBaseTx = (tx, blockIndex) => {
+  if (getTxId(tx) !== tx.id) {
+    // Check if our calculation of the tx is not the same
+    // as the tx's original id
+    return false;
+  } else if (tx.txIns.length !== 1) {
+    // There should only be one TxIn on this Coinbase Tx
+    return false;
+  } else if (tx.txIns[0].txOutIndex !== blockIndex) {
+    // The first TxIn of the tx should be the same as the blockIndex
+    return false;
+  } else if (tx.txOuts.length !== 1) {
+    // Coinbase Tx has only one output, which is the miner
+    return false;
+  } else if (tx.txOuts[0].amount !== COINBASE_AMOUNT) {
+    // A Coinbase Tx should only contain the reward
+    return false;
+  } else {
+    return true;
+  }
 };
