@@ -17,7 +17,7 @@ const {
   getBalance
 } = Wallet;
 
-const { addToMemPool } = MemPool;
+const { addToMemPool, getMemPool, updateMemPool } = MemPool;
 
 // Block Structure
 
@@ -217,7 +217,7 @@ const createNewBlock = () => {
     getNewestBlock().index + 1
   );
   // Include it on the block data
-  const blockData = [coinbaseTx];
+  const blockData = [coinbaseTx].concat(getMemPool());
   return createNewRawBlock(blockData);
 };
 
@@ -330,6 +330,7 @@ const addBlockToChain = newBlock => {
       // Add the block to the chain and update the uTxOutsList
       blockchain.push(newBlock);
       uTxOutsList = processedTxs;
+      updateMemPool(uTxOutsList);
       return true;
     }
   } else {
@@ -353,7 +354,8 @@ const sendTransaction = (address, amount) => {
     getPrivateFromWallet(),
     getUTxOutsList()
   );
-  addToMemPool(tx, getUTxOutsList());
+  addToMemPool(tx, uTxOutsList);
+  return tx;
 };
 
 module.exports = {

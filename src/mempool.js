@@ -5,6 +5,10 @@ const { validateTx } = Transactions;
 
 // Here we are gonna save all the unconfirmed Tx's
 let memPool = [];
+// Getter function
+const getMemPool = () => {
+  return _.cloneDeep(memPool);
+};
 
 // Get all the txIns inside of the mempool
 const getTxInsOnPool = txPool => {
@@ -44,16 +48,54 @@ const isTxValidForPool = (tx, txPool) => {
   return true;
 };
 
+// Here we validate the Tx that is going to be included in our memPool
 const addToMemPool = (tx, uTxOuts) => {
   // Before we add the Tx to the mempool we need to validate it
   if (!validateTx(tx, uTxOuts)) {
     throw Error("This Tx is invalid, it won't be added");
   } else if (!isTxValidForPool(tx, memPool)) {
-    throw Error("This Tx is invalid, it won't be added");
+    throw Error("This Tx is invalid for the pool, it won't be added");
   }
   memPool.push(tx);
 };
 
+// Is a TxIn inside of the uTxOuts?
+const hasTxIn = (txIn, uTxOuts) => {
+  const foundTxIn = uTxOuts.find(uTxO => {
+    return uTxO.txOutId === txIn.txOutId && uTxO.txOutIndex === txIn.txOutIndex;
+  });
+  return foundTxIn !== undefined;
+};
+
+/*
+We also need to update our mempool, this will be needed when a Tx
+is included inside of a block so now it's confirmed therefore not anymore
+mineable.
+We will also would like to invalidate other Tx, maybe because their TxOut referenced
+inside of the TxIn is already spent on a Tx that was already validated.
+*/
+const updateMemPool = uTxOuts => {
+  // We are gonna keep a list of the invalid Txs that we find
+  const invalidTxs = [];
+  for (const tx of memPool) {
+    for (const txIn of tx.txIns) {
+      if (!hasTxIn(txIn, uTxOuts)) {
+        invalidTxs.push(tx);
+        break;
+      }
+    }
+  }
+  /*
+    If the length of the invalidTxs list is more than 0
+    we need to remove the invalid Tx's from the pool
+  */
+  if (invalidTxs.length > 0) {
+    memPool = _.without(memPool, ...invalidTxs);
+  }
+};
+
 module.exports = {
-  addToMemPool
+  addToMemPool,
+  getMemPool,
+  updateMemPool
 };
