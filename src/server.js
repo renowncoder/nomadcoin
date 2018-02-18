@@ -9,7 +9,8 @@ const {
   getBlockchain,
   createNewBlock,
   createNewBlockWithTx,
-  getAccountBalance
+  getAccountBalance,
+  sendTransaction
 } = Blockchain;
 const { connectToPeers, startP2PServer } = P2P;
 const { initWallet } = Wallet;
@@ -51,6 +52,21 @@ app.post("/mineTransaction", (req, res) => {
 app.get("/balance", (req, res) => {
   const balance = getAccountBalance();
   res.send({ balance: balance });
+});
+
+app.post("/sendTransaction", (req, res) => {
+  try {
+    const address = req.body.address;
+    const amount = req.body.amount;
+    if (address === undefined || amount === undefined) {
+      throw Error("Please specify address and amount");
+    } else {
+      const resp = sendTransaction(address, amount);
+      res.send(resp);
+    }
+  } catch (e) {
+    res.status(400).send(e.message);
+  }
 });
 
 // export HTTP_PORT=

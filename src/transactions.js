@@ -82,7 +82,7 @@ const signTxIn = (tx, txInIndex, privateKey, unspentTxOuts) => {
   // Sign the ID with our private key
   const key = ec.keyFromPrivate(privateKey, "hex");
   // Black magic shit
-  const signature = utils.toHexString(key.sign(dataToSign).toEDR());
+  const signature = utils.toHexString(key.sign(dataToSign).toDER());
   return signature;
 };
 
@@ -400,5 +400,6 @@ module.exports = {
   signTxIn,
   isAddressValid,
   createCoinbaseTransaction,
-  processTransactions
+  processTransactions,
+  validateTx
 };

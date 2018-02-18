@@ -1,5 +1,7 @@
 const CryptoJS = require("crypto-js"),
+  _ = require("lodash"),
   Transactions = require("./transactions"),
+  MemPool = require("./mempool"),
   Wallet = require("./wallet"),
   hexToBinary = require("hex-to-binary");
 
@@ -14,6 +16,8 @@ const {
   getPrivateFromWallet,
   getBalance
 } = Wallet;
+
+const { addToMemPool } = MemPool;
 
 // Block Structure
 
@@ -338,6 +342,20 @@ const getAccountBalance = () => {
   return getBalance(getPublicFromWallet(), uTxOutsList);
 };
 
+// Deep Clone the uTxOutsList
+const getUTxOutsList = () => _.cloneDeep(uTxOutsList);
+
+// Send Transaction (that means just adding it to the memPool)
+const sendTransaction = (address, amount) => {
+  const tx = createTransaction(
+    address,
+    amount,
+    getPrivateFromWallet(),
+    getUTxOutsList()
+  );
+  addToMemPool(tx, getUTxOutsList());
+};
+
 module.exports = {
   getBlockchain,
   createNewBlock,
@@ -346,5 +364,6 @@ module.exports = {
   addBlockToChain,
   replaceChain,
   createNewBlockWithTx,
-  getAccountBalance
+  getAccountBalance,
+  sendTransaction
 };

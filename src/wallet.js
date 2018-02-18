@@ -114,6 +114,7 @@ const createTransaction = (receiverAddress, amount, privateKey, uTxOuts) => {
     const txIn = new TxIn();
     txIn.txOutId = uTxOut.txOutId;
     txIn.txOutIndex = uTxOut.txOutIndex;
+    return txIn;
   };
   // And here we create all the TxIn we need based on the TxOuts we created above
   const unsignedTxIns = includedUTxOuts.map(toUnsignedTxIn);
