@@ -13,7 +13,7 @@ const {
   sendTransaction
 } = Blockchain;
 const { connectToPeers, startP2PServer } = P2P;
-const { initWallet } = Wallet;
+const { initWallet, getPublicFromWallet } = Wallet;
 
 const HTTP_PORT = process.env.HTTP_PORT || 3000;
 const P2P_PORT = process.env.P2P_PORT || 4000;
@@ -52,6 +52,11 @@ app.post("/mineTransaction", (req, res) => {
 app.get("/balance", (req, res) => {
   const balance = getAccountBalance();
   res.send({ balance: balance });
+});
+
+app.get("/address", (req, res) => {
+  const address = getPublicFromWallet();
+  res.send({ address });
 });
 
 app.post("/sendTransaction", (req, res) => {

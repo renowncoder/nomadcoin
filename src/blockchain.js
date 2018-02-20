@@ -33,14 +33,27 @@ class Block {
   }
 }
 
+// Genesis Tx
+const genesisTx = {
+  txIns: [{ signature: "", txOutId: "", txOutIndex: 0 }],
+  txOuts: [
+    {
+      address:
+        "04aaeab6dcf3d725db209d58eb7d25f94579dcc55d9773f457cc77517edec0a3ec2fe10ca03e9981c7f628c6118ab2b3c4a69f87038c8ffeb18708169ecaaeec9d",
+      amount: 50
+    }
+  ],
+  id: "7142c935a6d9647a00a4ab8bae816394b47c4489f882737662c887408ba10665"
+};
+
 // Hardcode the genesisBlock
 
 const genesisBlock = new Block(
   0,
   "3DF6EF422472827B1E77AD3E7A194108BBB4D8B925176AFCABE7BEDA9E561071",
-  null,
+  "",
   1518512316,
-  "Genesis block MF",
+  [genesisTx],
   0,
   0
 );
@@ -48,6 +61,9 @@ const genesisBlock = new Block(
 // Create the blockchain with the Genesis Block hardcoded into it.
 
 let blockchain = [genesisBlock];
+
+// Put the uTxOuts on a list
+let uTxOutsList = processTransactions(blockchain[0].data, [], 0);
 
 // Find a block
 const findBlock = (index, previousHash, timestamp, data, difficulty) => {
@@ -150,9 +166,6 @@ const calculateNewDifficulty = (newestBlock, blockchain) => {
     return lastCalculated.difficulty;
   }
 };
-
-// Put the uTxOuts on a list
-let uTxOutsList = [];
 
 // Timestamp
 
@@ -280,9 +293,10 @@ const isChainValid = foreignChain => {
   if (!isGenesisValid(foreignChain[0])) {
     return false;
   }
-  // Validate each block from the other blockchain
+  //
   for (let i = 1; i < foreignChain.length; i++) {
     if (!isBlockValid(foreignChain[i], foreignChain[i - 1])) {
+      // TODO: Import uTxOuts
       return false;
     }
   }

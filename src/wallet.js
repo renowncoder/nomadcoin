@@ -43,7 +43,9 @@ const getPublicFromWallet = () => {
 */
 const getBalance = (address, uTxOuts) => {
   return _(uTxOuts)
-    .filter(uTxO => uTxO.address === address)
+    .filter(uTxO => {
+      return uTxO.address === address;
+    })
     .map(uTxO => uTxO.amount)
     .sum();
 };
@@ -104,6 +106,10 @@ const createTransaction = (receiverAddress, amount, privateKey, uTxOuts) => {
   const myAddress = getPublicKey(privateKey);
   // Then we get all of our UTxOuts
   const myUTxOuts = uTxOuts.filter(uTxO => uTxO.address === myAddress);
+  /*
+    TODO: I need to check if my uTxOuts are not inside of the mempool
+    as a TxIn because I'm about to count them
+  */
   // Now we check if we actually have the money to spend
   const { includedUTxOuts, leftOverAmount } = findAmountOnTxOuts(
     amount,
