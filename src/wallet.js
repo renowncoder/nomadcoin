@@ -42,7 +42,7 @@ const getPublicFromWallet = () => {
     lodash
 */
 const getBalance = (address, uTxOuts) => {
-  return _(uTxOuts)
+  return _(findUTxOuts(address, uTxOuts))
     .filter(uTxO => {
       return uTxO.address === address;
     })
@@ -111,7 +111,6 @@ const filterTxOutsfromMemPool = (uTxOuts, memPool) => {
     .map(tx => tx.txIns)
     .flatten()
     .value();
-  console.log(txIns);
   // Then we get an array ready to add the txIns that we are gonna remove
   const removables = [];
   for (const uTxOut of uTxOuts) {
@@ -121,7 +120,7 @@ const filterTxOutsfromMemPool = (uTxOuts, memPool) => {
         aTxIn.txOutId === uTxOut.txOutId
       );
     });
-    if (!txIn === undefined) {
+    if (txIn !== undefined) {
       removables.push(uTxOut);
     }
   }

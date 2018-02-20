@@ -397,11 +397,17 @@ const sendTransaction = (address, amount) => {
     getMemPool()
   );
   addToMemPool(tx, uTxOutsList);
+  require("./p2p").broadcastMempool();
   return tx;
 };
 
 // Getting myUTxOuts
 const myUTxOuts = () => findUTxOuts(getPublicFromWallet(), getUTxOutsList());
+
+// Handle a Tx when it's received from another peer
+const handleIncomingTx = tx => {
+  addToMemPool(tx, getMemPool());
+};
 
 module.exports = {
   getBlockchain,
@@ -414,5 +420,6 @@ module.exports = {
   getAccountBalance,
   sendTransaction,
   getUTxOutsList,
-  myUTxOuts
+  myUTxOuts,
+  handleIncomingTx
 };

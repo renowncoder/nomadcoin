@@ -1,4 +1,5 @@
 const WebSocket = require("ws"),
+  Mempool = require("./mempool"),
   Blockchain = require("./blockchain");
 
 const {
@@ -6,8 +7,11 @@ const {
   isBlockStructureValid,
   addBlockToChain,
   replaceChain,
-  getBlockchain
+  getBlockchain,
+  handleIncomingTx
 } = Blockchain;
+
+const { getMemPool } = Mempool;
 
 // We need to save the sockets somewhere
 const sockets = [];
@@ -17,6 +21,8 @@ const sockets = [];
 const GET_LATEST = "GET_LATEST";
 const GET_ALL = "GET_ALL";
 const BLOCKCHAIN_RESPONSE = "BLOCKCHAIN_RESPONSE";
+const REQUEST_MEMPOOL = "REQUEST_MEMPOOL";
+const MEMPOOL_RESPONSE = "MEMPOOL_RESPONSE";
 
 // Message Creators
 
@@ -41,6 +47,20 @@ const blockchainResponse = data => {
   };
 };
 
+const getMempool = () => {
+  return {
+    type: REQUEST_MEMPOOL,
+    data: null
+  };
+};
+
+const mempoolResponse = data => {
+  return {
+    type: MEMPOOL_RESPONSE,
+    data
+  };
+};
+
 // Start the P2P Server
 const startP2PServer = port => {
   const server = new WebSocket.Server({ port });
@@ -59,6 +79,9 @@ const initConnection = socket => {
   sockets.push(socket);
   socketMessageHandler(socket);
   sendMessage(socket, getLatest());
+  setTimeout(() => {
+    sendMessage(socket, getMemPool());
+  }, 1000);
 };
 
 // We use this to add peers
@@ -86,7 +109,6 @@ const socketMessageHandler = ws => {
     if (message === "null") {
       return;
     }
-    const receivedBlocks = message.data;
     switch (message.type) {
       case GET_LATEST:
         sendMessage(ws, returnLatest());
@@ -94,12 +116,40 @@ const socketMessageHandler = ws => {
       case GET_ALL:
         sendMessage(ws, returnAll());
         break;
+      // eslint-disable-next-line
       case BLOCKCHAIN_RESPONSE:
+        const receivedBlocks = message.data;
         // If the blockchain answers with no blocks break
         if (receivedBlocks === null) {
           break;
         }
         handleBlockchainResponse(receivedBlocks);
+        break;
+      case REQUEST_MEMPOOL:
+        sendMessage(ws, returnAllMempool());
+        break;
+      // eslint-disable-next-line
+      case MEMPOOL_RESPONSE:
+        //eslint-disable-next-line
+        const receivedTxs = message.data;
+        // If the mempool sends a null mempool
+        if (receivedTxs === null) {
+          break;
+        }
+        receivedTxs.forEach(tx => {
+          try {
+            /*
+              If nothing fails and there is no error
+              it means we added the Tx to the Mempool
+              so we can broadcast the new mempool
+            */
+            handleIncomingTx(tx);
+            broadcastMempool();
+          } catch (e) {
+            //eslint-disable-next-line
+            console.log(e);
+          }
+        });
         break;
     }
   });
@@ -110,11 +160,15 @@ const sendMessage = (ws, message) => ws.send(JSON.stringify(message));
 const sendMessageToAll = message =>
   sockets.forEach(socket => sendMessage(socket, message));
 
-const returnLatest = () => blockchainResponse([getNewestBlock()]);
-
 const broadcastNewBlock = () => sendMessageToAll(returnLatest());
 
+const returnLatest = () => blockchainResponse([getNewestBlock()]);
+
 const returnAll = () => blockchainResponse(getBlockchain());
+
+const returnAllMempool = () => mempoolResponse(getMemPool());
+
+const broadcastMempool = () => sendMessageToAll(returnAllMempool());
 
 const handleBlockchainResponse = receivedBlocks => {
   // Check if the blockchain size is bigger than zero
@@ -165,5 +219,6 @@ module.exports = {
   startP2PServer,
   connectToPeers,
   getSockets,
-  broadcastNewBlock
+  broadcastNewBlock,
+  broadcastMempool
 };

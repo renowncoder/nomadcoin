@@ -249,7 +249,9 @@ const getAmountInTxIn = (txIn, uTxOuts) =>
   findUnspentTxOut(txIn.txOutId, txIn.txOutIndex, uTxOuts).amount;
 
 const validateTx = (tx, uTxOuts) => {
-  if (getTxId(tx) !== tx.id) {
+  if (!isTxStructureValid(tx)) {
+    return null;
+  } else if (getTxId(tx) !== tx.id) {
     // We check if the tx has the same id
     // as the ID that we check by ourselves
     return false;
@@ -375,16 +377,10 @@ const validateBlockTransactions = (tx, uTxOuts, blockIndex) => {
     .reduce((a, b) => a && b, true);
 };
 
-// Check it the structure of the transactions is valid
-const isTxsStructureValid = txs =>
-  txs.map(isTxStructureValid).reduce((a, b) => a && b, true);
-
 // Process the transactions, this means validate them and then return the updated uTxOuts
 const processTransactions = (txs, uTxOuts, blockIndex) => {
   // First we validate the structure of the Tx
-  if (!isTxsStructureValid(txs)) {
-    return null;
-  } else if (!validateBlockTransactions(txs, uTxOuts, blockIndex)) {
+  if (!validateBlockTransactions(txs, uTxOuts, blockIndex)) {
     // We also validate the block transactions
     return null;
   }
