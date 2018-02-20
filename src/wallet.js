@@ -108,21 +108,24 @@ const createTxOuts = (receiverAddress, myAddress, amount, leftOverAmount) => {
 const filterTxOutsfromMemPool = (uTxOuts, memPool) => {
   // First we get all the txIns from the memPool
   const txIns = _(memPool)
-    .map(tx => tx.Ins)
+    .map(tx => tx.txIns)
     .flatten()
-    .values();
+    .value();
+  console.log(txIns);
   // Then we get an array ready to add the txIns that we are gonna remove
   const removables = [];
   for (const uTxOut of uTxOuts) {
-    const txIn = _.find(
-      txIns,
-      txIn =>
-        txIn.txOutIndex === uTxOut.txOutIndex && txIn.txOutId === uTxOut.txOutId
-    );
+    const txIn = _.find(txIns, aTxIn => {
+      return (
+        aTxIn.txOutIndex === uTxOut.txOutIndex &&
+        aTxIn.txOutId === uTxOut.txOutId
+      );
+    });
     if (!txIn === undefined) {
       removables.push(uTxOut);
     }
   }
+  return _.without(uTxOuts, ...removables);
 };
 
 // At last, we create a transaction.

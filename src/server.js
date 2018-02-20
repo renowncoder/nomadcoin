@@ -3,7 +3,8 @@ const express = require("express"),
   morgan = require("morgan"),
   Blockchain = require("./blockchain"),
   P2P = require("./p2p"),
-  Wallet = require("./wallet");
+  Wallet = require("./wallet"),
+  MemPool = require("./mempool");
 
 const {
   getBlockchain,
@@ -16,7 +17,7 @@ const {
 } = Blockchain;
 const { connectToPeers, startP2PServer } = P2P;
 const { initWallet, getPublicFromWallet } = Wallet;
-
+const { getMemPool } = MemPool;
 const HTTP_PORT = process.env.HTTP_PORT || 3000;
 const P2P_PORT = process.env.P2P_PORT || 4000;
 
@@ -82,6 +83,10 @@ app.get("/uTxOuts", (req, res) => {
 
 app.get("/myUTxOuts", (req, res) => {
   res.send(myUTxOuts());
+});
+
+app.get("/memPool", (req, res) => {
+  res.send(getMemPool());
 });
 
 // export HTTP_PORT=
