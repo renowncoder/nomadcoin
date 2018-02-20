@@ -297,16 +297,31 @@ const isChainValid = foreignChain => {
   };
   // Check if the genesis block is the same in our chain and theirs
   if (!isGenesisValid(foreignChain[0])) {
-    return false;
+    return null;
   }
-  //
+  // Here we loop and validate each block + its tx's
+
+  let foreignUTxOuts = [];
+
   for (let i = 1; i < foreignChain.length; i++) {
-    if (!isBlockValid(foreignChain[i], foreignChain[i - 1])) {
-      // TODO: Import uTxOuts
-      return false;
+    const currentBlock = foreignChain[i];
+    if (!isBlockValid(currentBlock, foreignChain[i - 1])) {
+      return null;
+    }
+    /*
+      When we validate a chain we also have to
+      validate all the uTxOuts
+    */
+    foreignUTxOuts = processTransactions(
+      currentBlock.data,
+      foreignUTxOuts,
+      currentBlock.index
+    );
+    if (foreignUTxOuts === null) {
+      return null;
     }
   }
-  return true;
+  return foreignUTxOuts;
 };
 
 // Calculate the difficulty of the chain by summing all the difficulties
@@ -319,15 +334,20 @@ const sumDifficulty = someBlockchain => {
 const replaceChain = newChain => {
   /*
     To replace a chain, the new chain must be:
-      1) Valid and,
+      1) Valid
       2) Be more 'difficult' than our current blockchain
+      3) Have valid uTxOuts
 
   */
+  const foreignUTxOuts = isChainValid(newChain);
+  const validChain = foreignUTxOuts !== null;
   if (
-    isChainValid(newChain) &&
+    validChain(newChain) &&
     sumDifficulty(newChain) > sumDifficulty(getBlockchain())
   ) {
     blockchain = newChain;
+    updateUTxOutsList(foreignUTxOuts);
+    updateMemPool(uTxOutsList);
     require("./p2p").broadcastNewBlock();
     return true;
   }
