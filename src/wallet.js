@@ -37,7 +37,7 @@ const getPublicFromWallet = () => {
 
 /*
     Getting the balance of a wallet is pretty simple,
-    all we have to do is to get all the uTxOuts that math
+    all we have to do is to get all the uTxOuts that match
     the public key (address) and add them up with the power of
     lodash
 */
@@ -49,6 +49,10 @@ const getBalance = (address, uTxOuts) => {
     .map(uTxO => uTxO.amount)
     .sum();
 };
+
+// Get uTxOuts by address
+const findUTxOuts = (address, uTxOuts) =>
+  _.filter(uTxOuts, uTxOut => uTxOut.address === address);
 
 // Initialize the wallet (aka create a private key)
 const initWallet = () => {
@@ -179,5 +183,6 @@ module.exports = {
   createTransaction,
   getPrivateFromWallet,
   initWallet,
-  getBalance
+  getBalance,
+  findUTxOuts
 };

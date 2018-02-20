@@ -10,7 +10,9 @@ const {
   createNewBlock,
   createNewBlockWithTx,
   getAccountBalance,
-  sendTransaction
+  sendTransaction,
+  getUTxOutsList,
+  myUTxOuts
 } = Blockchain;
 const { connectToPeers, startP2PServer } = P2P;
 const { initWallet, getPublicFromWallet } = Wallet;
@@ -72,6 +74,14 @@ app.post("/sendTransaction", (req, res) => {
   } catch (e) {
     res.status(400).send(e.message);
   }
+});
+
+app.get("/uTxOuts", (req, res) => {
+  res.send(getUTxOutsList());
+});
+
+app.get("/myUTxOuts", (req, res) => {
+  res.send(myUTxOuts());
 });
 
 // export HTTP_PORT=

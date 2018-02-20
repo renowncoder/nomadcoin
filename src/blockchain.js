@@ -14,7 +14,8 @@ const {
   getPublicFromWallet,
   createTransaction,
   getPrivateFromWallet,
-  getBalance
+  getBalance,
+  findUTxOuts
 } = Wallet;
 
 const { addToMemPool, getMemPool, updateMemPool } = MemPool;
@@ -399,6 +400,9 @@ const sendTransaction = (address, amount) => {
   return tx;
 };
 
+// Getting myUTxOuts
+const myUTxOuts = () => findUTxOuts(getPublicFromWallet(), getUTxOutsList());
+
 module.exports = {
   getBlockchain,
   createNewBlock,
@@ -408,5 +412,7 @@ module.exports = {
   replaceChain,
   createNewBlockWithTx,
   getAccountBalance,
-  sendTransaction
+  sendTransaction,
+  getUTxOutsList,
+  myUTxOuts
 };
