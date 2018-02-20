@@ -100,20 +100,48 @@ const createTxOuts = (receiverAddress, myAddress, amount, leftOverAmount) => {
   }
 };
 
+// Functiont to filter the txOuts from the mempool
+const filterTxOutsfromMemPool = (uTxOuts, memPool) => {
+  // First we get all the txIns from the memPool
+  const txIns = _(memPool)
+    .map(tx => tx.Ins)
+    .flatten()
+    .values();
+  // Then we get an array ready to add the txIns that we are gonna remove
+  const removables = [];
+  for (const uTxOut of uTxOuts) {
+    const txIn = _.find(
+      txIns,
+      txIn =>
+        txIn.txOutIndex === uTxOut.txOutIndex && txIn.txOutId === uTxOut.txOutId
+    );
+    if (!txIn === undefined) {
+      removables.push(uTxOut);
+    }
+  }
+};
+
 // At last, we create a transaction.
-const createTransaction = (receiverAddress, amount, privateKey, uTxOuts) => {
+const createTransaction = (
+  receiverAddress,
+  amount,
+  privateKey,
+  uTxOuts,
+  memPool
+) => {
   // First we get the public key from the private (address)
   const myAddress = getPublicKey(privateKey);
   // Then we get all of our UTxOuts
   const myUTxOuts = uTxOuts.filter(uTxO => uTxO.address === myAddress);
   /*
-    TODO: I need to check if my uTxOuts are not inside of the mempool
+    I need to check if my uTxOuts are not inside of the mempool
     as a TxIn because I'm about to count them
   */
+  const filteredUTxOuts = filterTxOutsfromMemPool(myUTxOuts, memPool);
   // Now we check if we actually have the money to spend
   const { includedUTxOuts, leftOverAmount } = findAmountOnTxOuts(
     amount,
-    myUTxOuts
+    filteredUTxOuts
   );
   // We need to create a function that create an unsigned TxIn based on a uTxOut
   const toUnsignedTxIn = uTxOut => {

@@ -196,7 +196,8 @@ const createNewBlockWithTx = (receiverAddress, amount) => {
     receiverAddress,
     amount,
     getPrivateFromWallet(),
-    uTxOutsList
+    uTxOutsList,
+    getMemPool()
   );
   const blockData = [coinbaseTx, tx];
   return createNewRawBlock(blockData);
@@ -371,7 +372,8 @@ const sendTransaction = (address, amount) => {
     address,
     amount,
     getPrivateFromWallet(),
-    getUTxOutsList()
+    getUTxOutsList(),
+    getMemPool()
   );
   addToMemPool(tx, uTxOutsList);
   return tx;
