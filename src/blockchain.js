@@ -65,6 +65,11 @@ let blockchain = [genesisBlock];
 // Put the uTxOuts on a list
 let uTxOutsList = processTransactions(blockchain[0].data, [], 0);
 
+// Function to replace the uTxOutsList
+const updateUTxOutsList = newUTxOuts => {
+  uTxOutsList = newUTxOuts;
+};
+
 // Find a block
 const findBlock = (index, previousHash, timestamp, data, difficulty) => {
   let nonce = 0;
@@ -343,7 +348,7 @@ const addBlockToChain = newBlock => {
     } else {
       // Add the block to the chain and update the uTxOutsList
       blockchain.push(newBlock);
-      uTxOutsList = processedTxs;
+      updateUTxOutsList(processedTxs);
       updateMemPool(uTxOutsList);
       return true;
     }
