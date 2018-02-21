@@ -396,7 +396,7 @@ const sendTransaction = (address, amount) => {
     getUTxOutsList(),
     getMemPool()
   );
-  addToMemPool(tx, uTxOutsList);
+  addToMemPool(tx, getUTxOutsList());
   require("./p2p").broadcastMempool();
   return tx;
 };

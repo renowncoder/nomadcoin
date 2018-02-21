@@ -82,7 +82,6 @@ const findAmountOnTxOuts = (amountNeeded, myUTxOuts) => {
       return { includedUTxOuts, leftOverAmount };
     }
   }
-  //eslint-disable-next-line
   throw Error("Not enough founds");
 };
 
