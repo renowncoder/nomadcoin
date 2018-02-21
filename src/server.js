@@ -1,4 +1,5 @@
 const express = require("express"),
+  _ = require("lodash"),
   bodyParser = require("body-parser"),
   morgan = require("morgan"),
   Blockchain = require("./blockchain"),
@@ -31,9 +32,51 @@ app.get("/blocks", (req, res) => {
   res.send(getBlockchain());
 });
 
-app.post("/mineBlock", (req, res) => {
+app.get("/blocks/:hash", (req, res) => {
+  const block = _.find(getBlockchain(), { hash: req.params.hash });
+  if (block === undefined) {
+    res.status(400).send("Block not found");
+  }
+  res.send(block);
+});
+
+app.post("/blocks/mine", (req, res) => {
   const newBlock = createNewBlock(req.body.data);
   res.send(newBlock);
+});
+
+app.post("/transactions", (req, res) => {
+  try {
+    const address = req.body.address;
+    const amount = req.body.amount;
+    if (address === undefined || amount === undefined) {
+      throw Error("Please specify address and amount");
+    } else {
+      const resp = sendTransaction(address, amount);
+      res.send(resp);
+    }
+  } catch (e) {
+    res.status(400).send(e.message);
+  }
+});
+
+app.get("/transactions/:id", (req, res) => {
+  const tx = _(getBlockchain())
+    .map(blocks => blocks.data)
+    .flatten()
+    .find({ id: req.params.id });
+  if (tx === undefined) {
+    res.status(400).send("Transaction not found");
+  }
+  res.send(tx);
+});
+
+app.get("/address/:address", (req, res) => {
+  const uTxOuts = _.filter(
+    getUTxOutsList(),
+    uTxO => uTxO.address === req.params.address
+  );
+  res.send(uTxOuts);
 });
 
 app.post("/addPeer", (req, res) => {
@@ -52,36 +95,21 @@ app.post("/mineTransaction", (req, res) => {
   }
 });
 
-app.get("/balance", (req, res) => {
+app.get("/me/balance", (req, res) => {
   const balance = getAccountBalance();
   res.send({ balance: balance });
 });
 
-app.get("/address", (req, res) => {
+app.get("/me/address", (req, res) => {
   const address = getPublicFromWallet();
   res.send({ address });
-});
-
-app.post("/sendTransaction", (req, res) => {
-  try {
-    const address = req.body.address;
-    const amount = req.body.amount;
-    if (address === undefined || amount === undefined) {
-      throw Error("Please specify address and amount");
-    } else {
-      const resp = sendTransaction(address, amount);
-      res.send(resp);
-    }
-  } catch (e) {
-    res.status(400).send(e.message);
-  }
 });
 
 app.get("/uTxOuts", (req, res) => {
   res.send(getUTxOutsList());
 });
 
-app.get("/myUTxOuts", (req, res) => {
+app.get("/me/uTxOuts", (req, res) => {
   res.send(myUTxOuts());
 });
 
