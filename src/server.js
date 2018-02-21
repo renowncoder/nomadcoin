@@ -113,7 +113,7 @@ app.get("/me/uTxOuts", (req, res) => {
   res.send(myUTxOuts());
 });
 
-app.get("/memPool", (req, res) => {
+app.get("/unconfirmed", (req, res) => {
   res.send(getMemPool());
 });
 

@@ -9,6 +9,6 @@ Features:
 * Block Mining (with Proof of Work + rewards)
 * Wallets
 * Transactions
+* Mempool
 * HTTP + Websocket Server built with ExpressJS
-* Chain Explorer built with ReactJS
 * P2P Connections
