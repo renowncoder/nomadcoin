@@ -49,7 +49,8 @@ const genesisTx = {
       amount: 50
     }
   ],
-  id: "7142c935a6d9647a00a4ab8bae816394b47c4489f882737662c887408ba10665"
+  timestamp: 1518512316,
+  id: "468774e6e93580a79d0dd8eb3c790734a749a9dda22e31a27aef44311e9a1145"
 };
 
 // Hardcode the genesisBlock

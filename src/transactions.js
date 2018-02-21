@@ -31,6 +31,9 @@ class Transaction {
   // ID
   // txIns []
   // txOuts []
+  constructor() {
+    this.timestamp = Math.round(new Date().getTime() / 1000);
+  }
 }
 
 // Unspent Transaction Output
@@ -44,18 +47,18 @@ class UnspentTxOut {
 }
 
 // Create the Transaction ID
-const getTxId = transaction => {
+const getTxId = tx => {
   // Add up all the content of the transactions Ins
-  const txInContent = transaction.txIns
+  const txInContent = tx.txIns
     .map(txIn => txIn.txOutId + txIn.txOutIndex)
     .reduce((a, b) => a + b, "");
   // Add up all the content of the transactions Out
-  const txOutContent = transaction.txOuts
+  const txOutContent = tx.txOuts
     .map(txOut => txOut.address + txOut.amount)
     .reduce((a, b) => a + b, "");
 
   // Return the hash
-  return CryptoJS.SHA256(txInContent + txOutContent).toString();
+  return CryptoJS.SHA256(txInContent + txOutContent + tx.timestamp).toString();
 };
 
 // Sign the transaction input
@@ -303,6 +306,7 @@ const validateCoinBaseTx = (tx, blockIndex) => {
   if (getTxId(tx) !== tx.id) {
     // Check if our calculation of the tx is not the same
     // as the tx's original id
+    console.log(getTxId(tx));
     return false;
   } else if (tx.txIns.length !== 1) {
     // There should only be one TxIn on this Coinbase Tx
