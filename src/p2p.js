@@ -47,7 +47,7 @@ const blockchainResponse = data => {
   };
 };
 
-const getMempool = () => {
+const requestMempool = () => {
   return {
     type: REQUEST_MEMPOOL,
     data: null
@@ -80,7 +80,7 @@ const initConnection = socket => {
   socketMessageHandler(socket);
   sendMessage(socket, getLatest());
   setTimeout(() => {
-    sendMessage(socket, getMemPool());
+    sendMessage(socket, requestMempool());
   }, 1000);
 };
 
@@ -173,11 +173,13 @@ const broadcastMempool = () => sendMessageToAll(returnAllMempool());
 const handleBlockchainResponse = receivedBlocks => {
   // Check if the blockchain size is bigger than zero
   if (receivedBlocks.length === 0) {
+    console.log("Received blocks");
     return;
   }
   const latestBlockReceived = receivedBlocks[receivedBlocks.length - 1];
   // Validate the latest block structure on the chain
   if (!isBlockStructureValid(latestBlockReceived)) {
+    console.log("The block structure is not valid");
     return;
   }
   // Get the newest block from the blockchain

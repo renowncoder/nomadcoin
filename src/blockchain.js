@@ -110,8 +110,6 @@ const hashMatchesDifficulty = (hash, difficulty) => {
   // Second we will get the difficulty of the block in zeros
   const requiredZeros = "0".repeat(difficulty);
   // Check if the hash in binary starts with that amount of zeros
-  // eslint-disable-next-line
-  console.log("Finding ", requiredZeros, " at the begining of: ", hashInBinary);
   return hashInBinary.startsWith(requiredZeros);
 };
 
@@ -220,6 +218,7 @@ const createNewRawBlock = data => {
   );
   if (addBlockToChain(newBlock)) {
     // We do this to avoid circular requirements
+
     require("./p2p").broadcastNewBlock();
     return newBlock;
   } else {
@@ -273,10 +272,12 @@ const isTimestampValid = (newBlock, oldBlock) => {
 // Valiate new blocks
 const isBlockValid = (newBlock, oldBlock) => {
   // Check if the structure of the new block is correct
+
   if (!isBlockStructureValid(newBlock)) {
     return false;
   } else if (oldBlock.index + 1 !== newBlock.index) {
     // Check if the index of the new block is greater than the old block's index
+
     return false;
     // Check if the new block's previous hash is the same as the old block's hash
   } else if (oldBlock.hash !== newBlock.previousHash) {
@@ -301,9 +302,7 @@ const isChainValid = foreignChain => {
     return null;
   }
   // Here we loop and validate each block + its tx's
-
   let foreignUTxOuts = [];
-
   for (let i = 1; i < foreignChain.length; i++) {
     const currentBlock = foreignChain[i];
     if (!isBlockValid(currentBlock, foreignChain[i - 1])) {
@@ -328,7 +327,10 @@ const isChainValid = foreignChain => {
 // Calculate the difficulty of the chain by summing all the difficulties
 
 const sumDifficulty = someBlockchain => {
-  return someBlockchain.map(block => block.difficulty).reduce((a, b) => a + b);
+  return someBlockchain
+    .map(block => block.difficulty)
+    .map(difficulty => Math.pow(2, difficulty))
+    .reduce((a, b) => a + b);
 };
 
 // Replace Chain
@@ -342,10 +344,7 @@ const replaceChain = newChain => {
   */
   const foreignUTxOuts = isChainValid(newChain);
   const validChain = foreignUTxOuts !== null;
-  if (
-    validChain(newChain) &&
-    sumDifficulty(newChain) > sumDifficulty(getBlockchain())
-  ) {
+  if (validChain && sumDifficulty(newChain) > sumDifficulty(getBlockchain())) {
     blockchain = newChain;
     updateUTxOutsList(foreignUTxOuts);
     updateMemPool(uTxOutsList);
@@ -366,6 +365,7 @@ const addBlockToChain = newBlock => {
     );
     if (processedTxs === null) {
       // If the Txs have not been validated
+
       return false;
     } else {
       // Add the block to the chain and update the uTxOutsList
@@ -406,7 +406,7 @@ const myUTxOuts = () => findUTxOuts(getPublicFromWallet(), getUTxOutsList());
 
 // Handle a Tx when it's received from another peer
 const handleIncomingTx = tx => {
-  addToMemPool(tx, getMemPool());
+  addToMemPool(tx, getUTxOutsList());
 };
 
 module.exports = {

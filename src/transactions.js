@@ -229,7 +229,7 @@ const isTxStructureValid = tx => {
   }
 };
 
-// We need to find the txIn and falidate it
+// We need to find the txIn and validate it
 const validateTxIn = (txIn, tx, uTxOuts) => {
   // So we start by finding a uTxO that is the input of a transaction
   const wantedTxOut = uTxOuts.find(uTxO => uTxO.txOutId === txIn.txOutId);
