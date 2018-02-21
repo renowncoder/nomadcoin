@@ -32,6 +32,11 @@ app.get("/blocks", (req, res) => {
   res.send(getBlockchain());
 });
 
+app.get("/blocks/latest", (req, res) => {
+  const lastFive = _.slice(getBlockchain(), -5);
+  res.send(lastFive);
+});
+
 app.get("/blocks/:hash", (req, res) => {
   const block = _.find(getBlockchain(), { hash: req.params.hash });
   if (block === undefined) {
@@ -40,7 +45,7 @@ app.get("/blocks/:hash", (req, res) => {
   res.send(block);
 });
 
-app.post("/blocks/mine", (req, res) => {
+app.post("/mine", (req, res) => {
   const newBlock = createNewBlock(req.body.data);
   res.send(newBlock);
 });

@@ -3,7 +3,7 @@ POST http://localhost:3000/addPeer
 Content-Type: application/json
 
 {
-    "peer": "ws://localhost:4001"
+    "peer": "http://localhost:4001"
 }
 
 ###
@@ -38,5 +38,5 @@ Content-Type: application/json
 
 ###
 
-POST http://localhost:3000/blocks/mine
+POST http://localhost:3000/mine
 Content-Type: application/json
