@@ -80,8 +80,8 @@ const initConnection = socket => {
   socketMessageHandler(socket);
   sendMessage(socket, getLatest());
   setTimeout(() => {
-    sendMessage(socket, requestMempool());
-  }, 1000);
+    sendMessageToAll(requestMempool());
+  }, 500);
 };
 
 // We use this to add peers
@@ -130,7 +130,6 @@ const socketMessageHandler = ws => {
         break;
       // eslint-disable-next-line
       case MEMPOOL_RESPONSE:
-        //eslint-disable-next-line
         const receivedTxs = message.data;
         // If the mempool sends a null mempool
         if (receivedTxs === null) {
@@ -146,8 +145,7 @@ const socketMessageHandler = ws => {
             handleIncomingTx(tx);
             broadcastMempool();
           } catch (e) {
-            //eslint-disable-next-line
-            console.log(e);
+            console.log("Found invalid", tx.id);
           }
         });
         break;

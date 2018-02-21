@@ -303,9 +303,9 @@ const isChainValid = foreignChain => {
   }
   // Here we loop and validate each block + its tx's
   let foreignUTxOuts = [];
-  for (let i = 1; i < foreignChain.length; i++) {
+  for (let i = 0; i < foreignChain.length; i++) {
     const currentBlock = foreignChain[i];
-    if (!isBlockValid(currentBlock, foreignChain[i - 1])) {
+    if (i !== 0 && !isBlockValid(currentBlock, foreignChain[i - 1])) {
       return null;
     }
     /*
@@ -347,7 +347,7 @@ const replaceChain = newChain => {
   if (validChain && sumDifficulty(newChain) > sumDifficulty(getBlockchain())) {
     blockchain = newChain;
     updateUTxOutsList(foreignUTxOuts);
-    updateMemPool(uTxOutsList);
+    updateMemPool(getUTxOutsList());
     require("./p2p").broadcastNewBlock();
     return true;
   }

@@ -232,10 +232,10 @@ const isTxStructureValid = tx => {
 // We need to find the txIn and validate it
 const validateTxIn = (txIn, tx, uTxOuts) => {
   // So we start by finding a uTxO that is the input of a transaction
-  const wantedTxOut = uTxOuts.find(
-    uTxO => uTxO.txOutId === txIn.txOutId && uTxO.txOutIndex === txIn.txOutIndex
-  );
-  if (wantedTxOut === null) {
+  const wantedTxOut = uTxOuts.find(uTxO => {
+    return uTxO.txOutId === txIn.txOutId && uTxO.txOutIndex === txIn.txOutIndex;
+  });
+  if (wantedTxOut === null || wantedTxOut === undefined) {
     return false;
   } else {
     // Get the address of the foudn uTxOut
