@@ -50,6 +50,7 @@ const genesisTx = {
     }
   ],
   timestamp: 1518512316,
+  amount: 50,
   id: "468774e6e93580a79d0dd8eb3c790734a749a9dda22e31a27aef44311e9a1145"
 };
 

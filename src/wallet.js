@@ -176,6 +176,7 @@ const createTransaction = (
     txIn.signature = signTxIn(tx, index, privateKey, uTxOuts);
     return txIn;
   });
+  tx.amount = amount;
   return tx;
 };
 

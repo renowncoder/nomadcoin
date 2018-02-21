@@ -109,6 +109,7 @@ const createCoinbaseTransaction = (address, blockIndex) => {
   // Only one txIn
   tx.txIns = [txIn];
   tx.txOuts = [new TxOut(address, COINBASE_AMOUNT)];
+  tx.amount = 50;
   tx.id = getTxId(tx);
   return tx;
 };
