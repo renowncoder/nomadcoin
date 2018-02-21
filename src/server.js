@@ -1,5 +1,6 @@
 const express = require("express"),
   _ = require("lodash"),
+  cors = require("cors"),
   bodyParser = require("body-parser"),
   morgan = require("morgan"),
   Blockchain = require("./blockchain"),
@@ -26,6 +27,8 @@ const app = express();
 
 app.use(bodyParser.json());
 
+app.use(cors());
+
 app.use(morgan("combined"));
 
 app.get("/blocks", (req, res) => {
@@ -33,7 +36,7 @@ app.get("/blocks", (req, res) => {
 });
 
 app.get("/blocks/latest", (req, res) => {
-  const lastFive = _.slice(getBlockchain(), -5);
+  const lastFive = _(getBlockchain()).slice(-5);
   res.send(lastFive);
 });
 
@@ -50,20 +53,29 @@ app.post("/mine", (req, res) => {
   res.send(newBlock);
 });
 
-app.post("/transactions", (req, res) => {
-  try {
-    const address = req.body.address;
-    const amount = req.body.amount;
-    if (address === undefined || amount === undefined) {
-      throw Error("Please specify address and amount");
-    } else {
-      const resp = sendTransaction(address, amount);
-      res.send(resp);
+app
+  .route("/transactions")
+  .get((req, res) => {
+    const txs = _(getBlockchain())
+      .map(blocks => blocks.data)
+      .flatten()
+      .slice(-5);
+    res.send(txs);
+  })
+  .post((req, res) => {
+    try {
+      const address = req.body.address;
+      const amount = req.body.amount;
+      if (address === undefined || amount === undefined) {
+        throw Error("Please specify address and amount");
+      } else {
+        const resp = sendTransaction(address, amount);
+        res.send(resp);
+      }
+    } catch (e) {
+      res.status(400).send(e.message);
     }
-  } catch (e) {
-    res.status(400).send(e.message);
-  }
-});
+  });
 
 app.get("/transactions/:id", (req, res) => {
   const tx = _(getBlockchain())
