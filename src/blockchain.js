@@ -32,10 +32,8 @@ class Block {
     this.difficulty = difficulty;
     this.nonce = nonce;
     this.amount = _(data)
-      .map(tx => tx.txOuts)
-      .flatten()
-      .map(txOut => txOut.amount)
-      .sum();
+      .map(tx => tx.amount)
+      .reduce((a, b) => a + b);
   }
 }
 
