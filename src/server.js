@@ -3,6 +3,7 @@ const express = require("express"),
   cors = require("cors"),
   bodyParser = require("body-parser"),
   morgan = require("morgan"),
+  paginate = require("paginate-array"),
   Blockchain = require("./blockchain"),
   P2P = require("./p2p"),
   Wallet = require("./wallet"),
@@ -32,7 +33,10 @@ app.use(cors());
 app.use(morgan("combined"));
 
 app.get("/blocks", (req, res) => {
-  res.send(getBlockchain());
+  const page = req.query.page || 1;
+  const blockchain = getBlockchain().reverse();
+  const paginatedBlockChain = paginate(blockchain, page, 15);
+  res.send(paginatedBlockChain);
 });
 
 app.get("/blocks/latest", (req, res) => {

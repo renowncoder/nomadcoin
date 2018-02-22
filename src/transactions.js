@@ -394,7 +394,6 @@ const processTransactions = (txs, uTxOuts, blockIndex) => {
     const modifiedTx = txs[tx];
     modifiedTx.inBlock = blockIndex;
     txs[tx] = modifiedTx;
-    console.log(txs);
   }
 
   return updateUnspentTxOuts(txs, uTxOuts);

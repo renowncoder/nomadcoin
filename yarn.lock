@@ -1267,6 +1267,10 @@ p-try@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/p-try/-/p-try-1.0.0.tgz#cbc79cdbaf8fd4228e13f621f2b1a237c1b207b3"
 
+paginate-array@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/paginate-array/-/paginate-array-2.0.0.tgz#8971d0b66ae6be3c95f99f7457fe0cad32cf9eb4"
+
 parse-json@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/parse-json/-/parse-json-2.2.0.tgz#f480f40434ef80741f8469099f8dea18f55a4dc9"
