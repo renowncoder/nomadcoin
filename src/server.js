@@ -35,8 +35,8 @@ app.use(morgan("combined"));
 app.get("/blocks", (req, res) => {
   const page = req.query.page || 1;
   const reversedBlockchain = _.cloneDeep(getBlockchain());
-  const paginatedBlockChain = paginate(reversedBlockchain.reverse(), page, 15);
-  res.send(paginatedBlockChain);
+  const paginatedBlockchain = paginate(reversedBlockchain.reverse(), page, 15);
+  res.send(paginatedBlockchain);
 });
 
 app.get("/blocks/latest", (req, res) => {
@@ -62,12 +62,14 @@ app.post("/mine", (req, res) => {
 app
   .route("/transactions")
   .get((req, res) => {
+    const page = req.query.page || 1;
     const txs = _(getBlockchain())
       .map(blocks => blocks.data)
       .flatten()
-      .slice(-5)
-      .reverse();
-    res.send(txs);
+      .reverse()
+      .value();
+    const paginatedTxs = paginate(txs, page, 15);
+    res.send(paginatedTxs);
   })
   .post((req, res) => {
     try {
@@ -83,6 +85,15 @@ app
       res.status(400).send(e.message);
     }
   });
+
+app.get("/transactions/latest", (req, res) => {
+  const txs = _(getBlockchain())
+    .map(blocks => blocks.data)
+    .flatten()
+    .slice(-5)
+    .reverse();
+  res.send(txs);
+});
 
 app.get("/transactions/:id", (req, res) => {
   const tx = _(getBlockchain())
