@@ -46,8 +46,8 @@ app.get("/blocks/latest", (req, res) => {
   res.send(lastFive);
 });
 
-app.get("/blocks/:hash", (req, res) => {
-  const block = _.find(getBlockchain(), { hash: req.params.hash });
+app.get("/blocks/:index", (req, res) => {
+  const block = _.find(getBlockchain(), { index: Number(req.params.index) });
   if (block === undefined) {
     res.status(400).send("Block not found");
   }
