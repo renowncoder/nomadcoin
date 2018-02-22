@@ -25,7 +25,6 @@ class TxIn {
   // txOutIndex
   // signature
 }
-
 // A transaction is made up of Transaction Input (txIns) and Transaction Outputs (txOuts)
 class Transaction {
   // ID
@@ -391,6 +390,13 @@ const processTransactions = (txs, uTxOuts, blockIndex) => {
     // We also validate the block transactions
     return null;
   }
+  for (const tx in txs) {
+    const modifiedTx = txs[tx];
+    modifiedTx.inBlock = blockIndex;
+    txs[tx] = modifiedTx;
+    console.log(txs);
+  }
+
   return updateUnspentTxOuts(txs, uTxOuts);
 };
 
