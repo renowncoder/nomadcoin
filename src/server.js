@@ -34,13 +34,15 @@ app.use(morgan("combined"));
 
 app.get("/blocks", (req, res) => {
   const page = req.query.page || 1;
-  const blockchain = getBlockchain().reverse();
-  const paginatedBlockChain = paginate(blockchain, page, 15);
+  const reversedBlockchain = _.cloneDeep(getBlockchain());
+  const paginatedBlockChain = paginate(reversedBlockchain.reverse(), page, 15);
   res.send(paginatedBlockChain);
 });
 
 app.get("/blocks/latest", (req, res) => {
-  const lastFive = _(getBlockchain()).slice(-5);
+  const lastFive = _(getBlockchain())
+    .slice(-5)
+    .reverse();
   res.send(lastFive);
 });
 
@@ -63,7 +65,8 @@ app
     const txs = _(getBlockchain())
       .map(blocks => blocks.data)
       .flatten()
-      .slice(-5);
+      .slice(-5)
+      .reverse();
     res.send(txs);
   })
   .post((req, res) => {
