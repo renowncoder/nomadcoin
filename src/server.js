@@ -106,12 +106,16 @@ app.get("/transactions/:id", (req, res) => {
   res.send(tx);
 });
 
-app.get("/address/:address", (req, res) => {
+app.get("/addresses/:address", (req, res) => {
   const uTxOuts = _.filter(
     getUTxOutsList(),
     uTxO => uTxO.address === req.params.address
   );
-  res.send(uTxOuts);
+  const sumedUp = _(uTxOuts)
+    .map(uTxO => uTxO.amount)
+    .reduce((a, b) => a + b, 0);
+
+  res.status(200).send(String(sumedUp));
 });
 
 app.post("/addPeer", (req, res) => {
