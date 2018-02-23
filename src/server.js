@@ -3,6 +3,7 @@ const express = require("express"),
   cors = require("cors"),
   bodyParser = require("body-parser"),
   morgan = require("morgan"),
+  getPort = require("get-port"),
   paginate = require("paginate-array"),
   Blockchain = require("./blockchain"),
   P2P = require("./p2p"),
@@ -21,8 +22,6 @@ const {
 const { connectToPeers, startP2PServer } = P2P;
 const { initWallet, getPublicFromWallet } = Wallet;
 const { getMemPool } = MemPool;
-const HTTP_PORT = process.env.HTTP_PORT || 3000;
-const P2P_PORT = process.env.P2P_PORT || 4000;
 
 const app = express();
 
@@ -157,12 +156,18 @@ app.get("/unconfirmed", (req, res) => {
 });
 
 // export HTTP_PORT=
-app.listen(HTTP_PORT, () => {
-  // eslint-disable-next-line
-  console.log(`Nomad Coin Node Running on port ${HTTP_PORT} ✅`);
+
+getPort().then(port => {
+  app.listen(port, () => {
+    // eslint-disable-next-line
+    console.log(`Nomad Coin Node Running on port ${port} ✅`);
+  });
 });
+
 try {
-  startP2PServer(P2P_PORT);
+  getPort().then(port => {
+    startP2PServer(port);
+  });
   initWallet();
 } catch (e) {
   console.log(e);
