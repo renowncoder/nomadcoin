@@ -78,6 +78,7 @@ const getSockets = () => sockets;
 const initConnection = socket => {
   sockets.push(socket);
   socketMessageHandler(socket);
+  initError(socket);
   sendMessage(socket, getLatest());
   setTimeout(() => {
     sendMessageToAll(requestMempool());
@@ -90,9 +91,8 @@ const connectToPeers = newPeer => {
   ws.on("open", () => {
     initConnection(ws);
   });
-  ws.on("error", () => {
-    console.log("Connection failed");
-  });
+  ws.on("close", () => console.log("Close"));
+  ws.on("error", () => console.log("Connection failed"));
 };
 
 // Parsing string to JSON
@@ -107,51 +107,55 @@ const parseMessage = data => {
 // Here we are gonna handle all the messages that our sockets get
 const socketMessageHandler = ws => {
   ws.on("message", data => {
-    const message = parseMessage(data);
-    // Check if we get an empty message
-    if (message === "null") {
-      return;
-    }
-    switch (message.type) {
-      case GET_LATEST:
-        sendMessage(ws, returnLatest());
-        break;
-      case GET_ALL:
-        sendMessage(ws, returnAll());
-        break;
-      // eslint-disable-next-line
-      case BLOCKCHAIN_RESPONSE:
-        const receivedBlocks = message.data;
-        // If the blockchain answers with no blocks break
-        if (receivedBlocks === null) {
+    try {
+      const message = parseMessage(data);
+      // Check if we get an empty message
+      if (message === null) {
+        return;
+      }
+      switch (message.type) {
+        case GET_LATEST:
+          sendMessage(ws, returnLatest());
           break;
-        }
-        handleBlockchainResponse(receivedBlocks);
-        break;
-      case REQUEST_MEMPOOL:
-        sendMessage(ws, returnAllMempool());
-        break;
-      // eslint-disable-next-line
-      case MEMPOOL_RESPONSE:
-        const receivedTxs = message.data;
-        // If the mempool sends a null mempool
-        if (receivedTxs === null) {
+        case GET_ALL:
+          sendMessage(ws, returnAll());
           break;
-        }
-        receivedTxs.forEach(tx => {
-          try {
-            /*
+        // eslint-disable-next-line
+        case BLOCKCHAIN_RESPONSE:
+          const receivedBlocks = message.data;
+          // If the blockchain answers with no blocks break
+          if (receivedBlocks === null) {
+            break;
+          }
+          handleBlockchainResponse(receivedBlocks);
+          break;
+        case REQUEST_MEMPOOL:
+          sendMessage(ws, returnAllMempool());
+          break;
+        // eslint-disable-next-line
+        case MEMPOOL_RESPONSE:
+          const receivedTxs = message.data;
+          // If the mempool sends a null mempool
+          if (receivedTxs === null) {
+            break;
+          }
+          receivedTxs.forEach(tx => {
+            try {
+              /*
               If nothing fails and there is no error
               it means we added the Tx to the Mempool
               so we can broadcast the new mempool
             */
-            handleIncomingTx(tx);
-            broadcastMempool();
-          } catch (e) {
-            console.log(tx.id);
-          }
-        });
-        break;
+              handleIncomingTx(tx);
+              broadcastMempool();
+            } catch (e) {
+              console.log(tx.id);
+            }
+          });
+          break;
+      }
+    } catch (e) {
+      console.log(e);
     }
   });
 };
@@ -216,6 +220,16 @@ const handleBlockchainResponse = receivedBlocks => {
     // If we receive a blockchain but we are not behind it, we do nothing.
     return;
   }
+};
+
+const initError = ws => {
+  const closeConnection = closedWs => {
+    closedWs.close();
+    // Remove the closed socket from our socket array
+    sockets.splice(sockets.indexOf(closedWs), 1);
+  };
+  ws.on("close", () => closeConnection(ws));
+  ws.on("error", () => closeConnection(ws));
 };
 
 module.exports = {

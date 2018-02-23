@@ -161,6 +161,9 @@ app.listen(HTTP_PORT, () => {
   // eslint-disable-next-line
   console.log(`Nomad Coin Node Running on port ${HTTP_PORT} ✅`);
 });
-
-startP2PServer(P2P_PORT);
-initWallet();
+try {
+  startP2PServer(P2P_PORT);
+  initWallet();
+} catch (e) {
+  console.log(e);
+}
