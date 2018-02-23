@@ -25,7 +25,7 @@ const { connectToPeers, startP2PServer } = P2P;
 const { initWallet, getPublicFromWallet } = Wallet;
 const { getMemPool } = MemPool;
 
-const MASTER_NODE = "http://localhost:62386";
+const MASTER_NODE = "http://localhost:63199";
 
 const app = express();
 
@@ -122,7 +122,6 @@ app.get("/addresses/:address", (req, res) => {
 });
 
 app.post("/addPeer", (req, res) => {
-  console.log(req.body.peer);
   connectToPeers(req.body.peer);
   res.send();
 });

@@ -83,6 +83,11 @@ const initConnection = socket => {
   setTimeout(() => {
     sendMessageToAll(requestMempool());
   }, 500);
+  setInterval(() => {
+    if (sockets.includes(socket)) {
+      sendMessage(socket);
+    }
+  }, 1000);
 };
 
 // We use this to add peers
