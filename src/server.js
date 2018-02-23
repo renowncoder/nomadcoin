@@ -4,7 +4,9 @@ const express = require("express"),
   bodyParser = require("body-parser"),
   morgan = require("morgan"),
   getPort = require("get-port"),
+  localtunnel = require("localtunnel"),
   paginate = require("paginate-array"),
+  fetch = require("node-fetch"),
   Blockchain = require("./blockchain"),
   P2P = require("./p2p"),
   Wallet = require("./wallet"),
@@ -22,6 +24,8 @@ const {
 const { connectToPeers, startP2PServer } = P2P;
 const { initWallet, getPublicFromWallet } = Wallet;
 const { getMemPool } = MemPool;
+
+const MASTER_NODE = "http://localhost:62386";
 
 const app = express();
 
@@ -118,6 +122,7 @@ app.get("/addresses/:address", (req, res) => {
 });
 
 app.post("/addPeer", (req, res) => {
+  console.log(req.body.peer);
   connectToPeers(req.body.peer);
   res.send();
 });
@@ -167,8 +172,22 @@ getPort().then(port => {
 try {
   getPort().then(port => {
     startP2PServer(port);
+    const tunnel = localtunnel(port, (err, tunnel) => {
+      addToMaster(tunnel.url);
+    });
   });
   initWallet();
 } catch (e) {
   console.log(e);
 }
+
+const addToMaster = url => {
+  const body = {
+    peer: url
+  };
+  fetch(`${MASTER_NODE}/addPeer`, {
+    method: "POST",
+    body: JSON.stringify(body),
+    headers: { "Content-Type": "application/json" }
+  }).catch(e => {});
+};

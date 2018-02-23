@@ -8,8 +8,10 @@
     "get-port": "^3.2.0",
     "global": "^4.3.2",
     "hex-to-binary": "^1.0.1",
+    "localtunnel": "^1.8.3",
     "lodash": "^4.17.5",
     "morgan": "^1.9.0",
+    "node-fetch": "^2.0.0",
     "paginate-array": "^2.0.0",
     "ws": "^4.0.0"
   },
