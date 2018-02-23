@@ -110,6 +110,8 @@ const createCoinbaseTransaction = (address, blockIndex) => {
   tx.txOuts = [new TxOut(address, COINBASE_AMOUNT)];
   tx.id = getTxId(tx);
   tx.amount = 50;
+  tx.to = address;
+  tx.from = "COINBASE";
   return tx;
 };
 

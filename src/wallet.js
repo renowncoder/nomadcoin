@@ -177,6 +177,8 @@ const createTransaction = (
     return txIn;
   });
   tx.amount = amount;
+  tx.from = myAddress;
+  tx.to = receiverAddress;
   return tx;
 };
 

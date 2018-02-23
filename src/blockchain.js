@@ -49,6 +49,9 @@ const genesisTx = {
   ],
   amount: 50,
   timestamp: 1518512316,
+  to:
+    "04aaeab6dcf3d725db209d58eb7d25f94579dcc55d9773f457cc77517edec0a3ec2fe10ca03e9981c7f628c6118ab2b3c4a69f87038c8ffeb18708169ecaaeec9d",
+  from: "COINBASE",
   id: "468774e6e93580a79d0dd8eb3c790734a749a9dda22e31a27aef44311e9a1145"
 };
 
@@ -109,7 +112,7 @@ const findBlock = (index, previousHash, timestamp, data, difficulty) => {
 
 // Check if the hash matches the dificulty
 
-const hashMatchesDifficulty = (hash, difficulty) => {
+const hashMatchesDifficulty = (hash, difficulty = 0) => {
   // First we need to convert the hex hash into binary
   const hashInBinary = hexToBinary(hash);
   // Second we will get the difficulty of the block in zeros
