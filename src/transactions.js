@@ -108,8 +108,8 @@ const createCoinbaseTransaction = (address, blockIndex) => {
   // Only one txIn
   tx.txIns = [txIn];
   tx.txOuts = [new TxOut(address, COINBASE_AMOUNT)];
-  tx.amount = 50;
   tx.id = getTxId(tx);
+  tx.amount = 50;
   return tx;
 };
 
@@ -390,12 +390,6 @@ const processTransactions = (txs, uTxOuts, blockIndex) => {
     // We also validate the block transactions
     return null;
   }
-  for (const tx in txs) {
-    const modifiedTx = txs[tx];
-    modifiedTx.inBlock = blockIndex;
-    txs[tx] = modifiedTx;
-  }
-
   return updateUnspentTxOuts(txs, uTxOuts);
 };
 

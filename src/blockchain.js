@@ -47,8 +47,8 @@ const genesisTx = {
       amount: 50
     }
   ],
-  timestamp: 1518512316,
   amount: 50,
+  timestamp: 1518512316,
   id: "468774e6e93580a79d0dd8eb3c790734a749a9dda22e31a27aef44311e9a1145"
 };
 
@@ -282,7 +282,6 @@ const isBlockValid = (newBlock, oldBlock) => {
     return false;
   } else if (oldBlock.index + 1 !== newBlock.index) {
     // Check if the index of the new block is greater than the old block's index
-
     return false;
     // Check if the new block's previous hash is the same as the old block's hash
   } else if (oldBlock.hash !== newBlock.previousHash) {

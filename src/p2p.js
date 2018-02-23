@@ -90,6 +90,9 @@ const connectToPeers = newPeer => {
   ws.on("open", () => {
     initConnection(ws);
   });
+  ws.on("error", () => {
+    console.log("Connection failed");
+  });
 };
 
 // Parsing string to JSON
@@ -145,7 +148,7 @@ const socketMessageHandler = ws => {
             handleIncomingTx(tx);
             broadcastMempool();
           } catch (e) {
-            console.log("Found invalid", tx.id);
+            console.log(tx.id);
           }
         });
         break;
@@ -204,9 +207,9 @@ const handleBlockchainResponse = receivedBlocks => {
       sendMessageToAll(getAll());
     } else {
       /* 
-              If we get more than one block and our blockchain is behind,
-              we will just replace our blockchain with the longer one that we just received
-            */
+        If we get more than one block and our blockchain is behind,
+        we will just replace our blockchain with the longer one that we just received
+      */
       replaceChain(receivedBlocks);
     }
   } else {
