@@ -112,11 +112,11 @@ const findBlock = (index, previousHash, timestamp, data, difficulty) => {
 
 // Check if the hash matches the dificulty
 
-const hashMatchesDifficulty = (hash, difficulty = 0) => {
+const hashMatchesDifficulty = (hash, difficulty) => {
   // First we need to convert the hex hash into binary
   const hashInBinary = hexToBinary(hash);
   // Second we will get the difficulty of the block in zeros
-  const requiredZeros = "0".repeat(difficulty);
+  const requiredZeros = "0".repeat(difficulty || 0);
   // Check if the hash in binary starts with that amount of zeros
   return hashInBinary.startsWith(requiredZeros);
 };
@@ -170,7 +170,7 @@ const calculateNewDifficulty = (newestBlock, blockchain) => {
   if (timeTaken < timeExpected / 2) {
     // If the time taken to mine the block is less than the time expected by two(100/2=50) increase the difficutly
     return lastCalculated.difficulty + 1;
-  } else if (timeTaken > timeExpected * 2) {
+  } else if (timeTaken > timeExpected * 2 && lastCalculated.difficulty !== 0) {
     // If the time taken is more than the time expected times two (100*2=200) decrease the difficulty
     return lastCalculated.difficulty - 1;
   } else {
