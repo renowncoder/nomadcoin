@@ -174,6 +174,7 @@ try {
     const tunnel = localtunnel(port, (err, tunnel) => {
       addToMaster(tunnel.url);
     });
+    tunnel.on("error", () => console.log("error on tunnel"));
   });
   initWallet();
 } catch (e) {
@@ -190,3 +191,5 @@ const addToMaster = url => {
     headers: { "Content-Type": "application/json" }
   }).catch(e => {});
 };
+
+process.on("unhandledRejection", err => console.log("unhandled", error));
