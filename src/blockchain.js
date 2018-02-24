@@ -63,7 +63,7 @@ const genesisBlock = new Block(
   "",
   1518512316,
   [genesisTx],
-  0,
+  5,
   0
 );
 

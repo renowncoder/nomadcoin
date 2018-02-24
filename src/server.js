@@ -1,4 +1,5 @@
 const express = require("express"),
+  http = require("http"),
   _ = require("lodash"),
   cors = require("cors"),
   bodyParser = require("body-parser"),
@@ -25,7 +26,7 @@ const { connectToPeers, startP2PServer } = P2P;
 const { initWallet, getPublicFromWallet } = Wallet;
 const { getMemPool } = MemPool;
 
-const MASTER_NODE = "http://localhost:63199";
+const MASTER_NODE = "https://nomadcoin.now.sh";
 
 const app = express();
 
@@ -160,36 +161,12 @@ app.get("/unconfirmed", (req, res) => {
 });
 
 // export HTTP_PORT=
-
-getPort().then(port => {
-  app.listen(port, () => {
-    // eslint-disable-next-line
-    console.log(`Nomad Coin Node Running on port ${port} ✅`);
-  });
+const server = app.listen(8080, () => {
+  // eslint-disable-next-line
+  console.log(`Nomad Coin Node Running on port 8080 ✅`);
 });
 
-try {
-  getPort().then(port => {
-    startP2PServer(port);
-    const tunnel = localtunnel(port, (err, tunnel) => {
-      addToMaster(tunnel.url);
-    });
-    tunnel.on("error", () => console.log("error on tunnel"));
-  });
-  initWallet();
-} catch (e) {
-  console.log(e);
-}
+startP2PServer(server);
+initWallet();
 
-const addToMaster = url => {
-  const body = {
-    peer: url
-  };
-  fetch(`${MASTER_NODE}/addPeer`, {
-    method: "POST",
-    body: JSON.stringify(body),
-    headers: { "Content-Type": "application/json" }
-  }).catch(e => {});
-};
-
-process.on("unhandledRejection", err => console.log("unhandled", error));
+process.on("unhandledRejection", err => console.log("unhandled", err));

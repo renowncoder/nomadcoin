@@ -62,13 +62,13 @@ const mempoolResponse = data => {
 };
 
 // Start the P2P Server
-const startP2PServer = port => {
-  const server = new WebSocket.Server({ port });
-  server.on("connection", ws => {
+const startP2PServer = server => {
+  const wsServer = new WebSocket.Server({ server });
+  wsServer.on("connection", ws => {
     initConnection(ws);
   });
   // eslint-disable-next-line
-  console.log(`Nomad Coin P2P Server Running on port ${port} ✅`);
+  console.log(`Nomad Coin P2P Server ✅`);
 };
 
 // Getting the sockets
