@@ -1,10 +1,11 @@
 const EC = require("elliptic").ec,
   fs = require("fs"),
   _ = require("lodash"),
+  path = require("path"),
   Transactions = require("./transactions");
 
 const ec = new EC("secp256k1");
-const privateKeyLocation = "./privateKey";
+const privateKeyLocation = path.join(__dirname, "./privateKey");
 
 const {
   TxOut,
