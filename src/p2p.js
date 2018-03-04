@@ -96,6 +96,7 @@ const connectToPeers = newPeer => {
   ws.on("open", () => {
     initConnection(ws);
   });
+  ws._socket.setKeepAlive(true);
   ws.on("close", () => console.log("Close"));
   ws.on("error", () => console.log("Connection failed"));
 };
